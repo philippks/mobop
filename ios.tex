@@ -1,0 +1,1434 @@
+\section{Swift and IOS}
+
+\subsection{Arrays}
+have to be same type, value semantics, empty array [], [Int] = Array<Int>
+\begin{lstlisting}
+let ints1 = [1, 2, 3, 4, 5] //Array<Int>
+var ints2 = ints1 // mutable copy
+ints2.append(6) // here copy
+print(ints1)
+let strs = Array(repeating: "Hi", count: 10)
+for s in strs { ... }
+for (i, s) in strs.enumerated() { ... }
+ints2[0...<3] = [0, 0]
+ints2[0...4] = []
+\end{lstlisting}
+
+\subsection{Sets}
+Elements needs to conform Hashable protocol. Value semantics.
+\begin{lstlisting}
+var letters: Set<Character> = []
+for c in "it is a test".characters {
+   letters.insert(c) }
+if letters.contains(" ") { // compiler knows its char not str
+   print(letters.count) }
+\end{lstlisting}
+
+\subsection{Dictionaries}
+keys need to conform to Hashable protocol. value semantics, empty dictionary [:]
+[TypeK:TypeV] = Dictionary<TypeK, TypeV>
+\begin{lstlisting}
+let population = ["Switzerland" : 8_000_000,
+                       "Germany" : 80_000_000]
+for (country, count) in population {
+   print("\(country): \(count) people") }
+print(population["Germany"])
+print(population["Italy"]) // nil
+population["France"] = 66_000_000 //new
+for k in population.keys { }
+for v in population.values { }
+\end{lstlisting}
+
+\subsection{Tuples}
+Tuples, function types, any, anyobjects cant be extended !
+multiple values into single compound value, can have different types, no single-element tuples Type(Int) = type int. Expression ("hello") = type String not (String). Empty tuple () is a valid type. Has a single value, same as Void
+\begin{lstlisting}
+let john = (33, "John") // (Int, String)
+print("\(john,1) is \(john.0).")
+let dora1 = (age: 26, name: "Dora1")
+var dora2 = dora1
+dora2.name = "Dora2"
+dora2.age += 1
+print(\(dora2.name) is \(dora2.age))
+\end{lstlisting}
+
+\subsection{Function Types ** buggy}
+\begin{lstlisting}
+func f1() {}  // (()) -> () **
+func f2(_x: Int) -> Int { return x } // (Int) -> Int
+func f3(_x: Int, _y: Int) {} // ((Int, Int)) -> () **
+func f4(_x: (Int, Int)) {} // ((Int, Int)) -> Int
+\end{lstlisting}
+
+
+\subsection{Any vs AnyObject}
+any: existential type without requirements, build into compiler, all types are implicit subtypes of it
+\begin{lstlisting}
+func f(_x: Any) {}
+class C {}
+let c = C()
+f(c)
+f(2)
+f((0.5, "test"))
+f([true, false, true])
+f(f)
+\end{lstlisting}
+They all work. If AnyObject instead of Any it has to be a class. Only f(c) works. (class requirement)
+Never: uninhabited type in stl (doesnt have any value) public enum Never{}, means that function can not return, examples fatalError() exit(), they can be used in else-clause of guard statement.
+
+\subsection{Type Inference}
+uses bi-directional type inference (not like C++, Java, Objective C), scope limited to single statement
+let x, x = 10 is not possible! (has to be x:Int). Sometimes doesnt work as expected or takes a bit longer to compile.
+\begin{lstlisting}
+let d = 5.5
+let f: Float = 5.5
+func id<T>(_x: T) -> T { return x }
+func(g) -> Int { return 42 }
+func g() -> String { return "Test" }
+let x = id(g()) //error ambiguous
+let i:Int = id(g()) // 42
+let s:String = id(g()) // "Test"
+\end{lstlisting}
+
+\subsection{Force Unwrapping}
+\begin{lstlisting}
+var optInt: Int?  //nil = Optional<Int>
+optInt = 42  // Optional<Int>
+print(optInt!) //42 if nil = error
+\end{lstlisting}
+
+\subsection{Optional Binding}
+Creates a new variable from optional but only if not nil. Can be used in condition (if while guard) true if not nil.
+\begin{lstlisting}
+if let text = readLine(),
+  let number = Int(text) {
+  print("Number = \(number)")
+} else { print("No number") }
+\end{lstlisting}
+
+\subsection{Optional Chaining}
+\begin{lstlisting}
+var text = readLine()?.uppercased() // () nil -> nil
+print(type(of: text)) //Optional<String> res = Optional
+text?.append("test")  //text nil -> not called
+\end{lstlisting}
+
+\subsection{Nil Coalescing Operator}
+\begin{lstlisting}
+let text = readLine() ?? ""
+let number = Int(text) ?? -1 // res non optional
+\end{lstlisting}
+
+\subsection{If Statement}
+\begin{lstlisting}
+let arr ? [1, 2, 3]
+let opt: Int? = 42
+if !arr.isEmpty, let opt = opt {
+   // array is not empty, optional not nil
+} else { empty or optional nil }
+\end{lstlisting}
+
+\subsection{Switch Statement // doesnt fall through cases}
+\begin{lstlisting}
+let peopleCount = 42
+switch peopleCount {
+   case 0:
+      print("no people")
+   case 1:
+      print("one person")
+   case 2...10:
+      print("a few people")
+   default:
+      print("lots of people") }
+\end{lstlisting}
+
+\subsection{For-In Statement}
+\begin{lstlisting}
+let numbers = [4, 8, 15, 16, 23, 42]
+for n in numbers {
+   print(n) }
+for (i,n) in numbers.enumerated(){ //tuple
+   print("numbers[\(i))] = \(n)") }
+for n in numbers where n % 2 == 0 {
+   print(n) }
+\end{lstlisting}
+
+\subsection{While Statement}
+\begin{lstlisting}
+while let line = readLine() {
+   print(line) }
+\end{lstlisting}
+
+\subsection{Repeat-While Statement}
+\begin{lstlisting}
+repeat{
+   if let pw = readLine() {
+      if pw == "secret" {
+         break  // successful }
+   } else {
+      break }
+} while true
+\end{lstlisting}
+
+\subsection{Guard \& Defer Statement}
+\begin{lstlisting}
+import Foundation
+func readFile(at path: String) -> String? {
+   guard let file = FileHandle(
+     forReadingAtPath: path) else {
+      return nil } // file path not exist
+   defer { file.closeFile() } // closed at end of f
+   let data = file.readDataToEndOfFile()
+   guard let content = String(data: data,
+     encoding: utf8) else {
+      file.closeFile()
+      return nil }
+   return content }
+if let content = readFile(at: "/path/file.txt") {
+   print(content) }
+\end{lstlisting}
+
+\subsection{Error Handling}
+\begin{lstlisting}
+enum FileError: Error {
+   case notFound
+   case unknownEncoding }
+... readFile(...) throws -> String {
+	guard ... else { throw FileError.notFound }
+	...
+	" { throw FileError.unknownEncoding }
+	... }
+do {
+	let content = try readFile... }
+catch FileError.notFound { print("error nf")}
+catch FileError.unknownEncoding ...
+// instead of do try catch throw
+// 1. let content = try? readFile(...)  nil
+// 2, let content = try! readFile(...)  fatal error
+\end{lstlisting}
+
+\subsection{Stored Properties}
+\begin{lstlisting}
+var a: Int   // cant print now
+a = 8  // ok
+var b = "Hello" //String infered by compiler
+var c1 = 2, c2 = 4.5
+var (d1,d2) = (2, 4.5) // useful for return
+var x: Int = 0 {
+   willSet { //called before change }
+   didSet { //called after change } }
+\end{lstlisting}
+
+\subsection{Computed Properties}
+\begin{lstlisting}
+import Foundation
+var v = {6.0, 8.0}
+var vlen: Double{
+   return sqrt(v.0 * v.0 + v.1 * v.1) }
+var radius = 5.0
+var area: Double{
+   get { return radius * radius * Double.pi }
+   set { radius = sqrt(newValue / Double.pi) } }
+\end{lstlisting}
+
+\subsection{Lazy Properties}
+\begin{lstlisting}
+class File {
+...
+   lazy var content: String? = {
+      return try? String(contentsOfFile: self.path,...)
+   } }
+let file = File(path: "as.txt") //content not
+print(file.content) // file is read, accessed 1st
+print(file.content) // not read again
+\end{lstlisting}
+
+\subsection{Functions Parameter Names}
+functions can be overloaded, generic, are reference types, first-class types = can be passed to other functions, can return other functions, declarations can be nested. Parameters have internal (person, hometown) and external name (person, from).
+\begin{lstlisting}
+func greet(person: String, from hometown: String) {
+   print("Hello, \(person) from \(hometown)!") }
+func square(_ n: Int) -> Int {
+   return n * n; } //no external name, inernal n
+greet(person: "Tim", from: "BR")
+print(square(5))
+\end{lstlisting}
+
+\subsection{Higher-Order Function}
+\begin{lstlisting}
+let numbers = [1, 2, 3, 4, 5]
+func multiplyByTwo(n: Int) -> Int {
+   return 2 * n }
+print(numbers.map(multiplyByTwo))
+func makeMultiplier(factor: Int) -> (Int) -> Int {
+	func multiplier(n: Int) -> Int {
+	   return factor * n }
+	return multiplier }
+let multiplyByThree = makeMultiplier(factor: 3)
+print(numbers.map(multiplyByThree))
+\end{lstlisting}
+
+\subsection{Generic Functions}
+\begin{lstlisting}
+func _min<T: Comparable> (_ x: T, _ y: T) -> T {
+   return y < x ? y : x }
+func sum<T: Sequence>(_ numbers: T) -> Int where T.iterator.Element == Int {
+   return numbers.reduce(0,+) }
+\end{lstlisting}
+
+\subsection{Inout Parameter}
+when the function is called, the value of the argument is copied. in the body of the function the copy is modified, when the function returns the copy's value is assigned to the original argument.
+\begin{lstlisting}
+func _swap<T>(_ x: inout T, _y: inout T) {
+   (x,y) = (y,x) }
+_swap(&i1, &i2)
+\end{lstlisting}
+
+\subsection{print}
+\begin{lstlisting}
+func print(_ items: Any..., separator: String = " ", terminator: String = "\n")
+//variadic parameter, because the parameter separator and terminator have an external name we can omit eithr one or both of them.
+\end{lstlisting}
+
+\subsection{Closures (anonymous functions)}
+\begin{lstlisting}
+let numbers = [1, 2, 3, 4, 5]
+//full closure syntax
+let squaredNumbes = numbers.map({ (n: Int) -> Int in return n * n })
+//infer parameter type and return type
+.. = numbers.map( { n in return n * n})
+//use implicit parameter names ($0, $0) and implicit return
+.. = numbers.map({ $0 * $1})
+//use trailing closure syntax
+.. = numbers.map {$0 * $0}
+// by default captured by ref
+let closure1 = { print(x) } //x change = change
+// by value
+let closure2 = { [y] in print(y) } // y change = same
+\end{lstlisting}
+
+\subsection{Classes}
+are reference types, support single inheritance, can adopt zero or more protocols, can be generic, initializers and deinitializer. If all properties of a type have a default value, a default initializer is implicitly generated. For structs, a member-wise initializer is generated.
+\begin{lstlisting}
+class Person {
+   var name: String
+   init(name: String) {
+      self.name =  name } }
+let p1 = Person(name: "Tim")
+p1 = Person(name: "Tom") // error
+p1.name = "Tom" // ok
+var p2 = Person(name: "Steve")
+p2 = p1
+\end{lstlisting}
+
+\subsection{Initializers}
+\begin{lstlisting}
+init() { self.name = "<unknown>" }
+init?(name: String) { // failable initializer
+   guard !name.isEmpty else { return nil }
+   self.name = name; }
+\end{lstlisting}
+
+\subsection{Casting Operators}
+\begin{lstlisting}
+class Animal {}  //downcasting needs !
+class Cat: Animal {}
+class Dog: Animal {}
+let cat1 = Cat()  // stat cat, dyn cat
+let cat2: Animal = Cat() // stat an, dyn cat
+let x1 = cat1 as Animal // stat an, dyn cat
+let x2 = cat2 as! Cat // stat cat, dyn cat
+let x3 = cat2 as! Dog // runtime error!
+if let x4 = cat2 as? Dog {..} // better
+var a: Animal = Dog() //stat an, dyn dog
+if (a is Dog) {..}
+a = Cat()  //stat Animal, dyn Cat
+switch a { case is Cat: ...}
+\end{lstlisting}
+
+\subsection{Subscript}
+\begin{lstlisting}
+class Matrix {
+   ...
+   var grid: [Double]
+   init(rows: Int, cols: Int) {
+      self.rows = rows
+      self.cols = cols
+      grid = Array(repeating: 0.0, count: rows * cols) }
+   subscript(row: Int, col: Int) -> Double {
+      get { return grid[(row * cols) + col] }
+      set { grid[(row * cols) * col] = newValue} } }
+let m = Matrix(rows: 5, cols: 5)
+m[3, 3] = 10
+print(m[3,3])
+\end{lstlisting}
+
+\subsection{Strong vs Weak References}
+uses ARC, it's a form of garbage collection but different from Java's Mark and Sweep. Benefits: Deterministic destruction, better for real time applications where you dont want garbage collection pauses. Drawbacks: there can be strong reference cycle = memory leaks.
+How it works: reference count for each class instance. New reference points to an instance = increment. Reference goes out of scope = decrement. When counter is 0 = deallocate. (only for reference types such as class but not struct!)
+\begin{lstlisting}
+class ClassA {
+   var b: ClassB?
+   //weak var b: ClassB? // must be class type, optional, variable not left-constant, is nill when deallocated, no increment!
+   deinit {print("ClassB")} }
+class ClassB {
+   var a: ClassA?
+   //weak var a: ClassA?
+   deinit {print("ClassA")} }
+func f() {
+   let a = ClassA(), b = ClassB()
+   a.b = b // +1 but +0 if weak ref
+   b.a = a  } // +1 if out of scope still 1 = leak
+\end{lstlisting}
+
+\subsection{Access Control}
+TODO TODO TODO TODO
+TODO TODO TODO TODO
+TODO TODO TODO TODO
+TODO TODO TODO TODO
+TODO TODO TODO TODO
+TODO TODO TODO TODO
+
+\subsection{structs}
+value types, dont support inheritance, can adopt 0 or more protocols, can be generic, initializers but no deinitializers. Int, Double,. Bool, String, Array<T> are implemented with structs.
+\begin{lstlisting}
+struct Person {
+   var name: String }
+let p1 = Person(name: "Tim")
+p1 = Person(name: "Tom") //error
+p1.name = "Tom" //error
+var p2 = p1 // mutable copy of p1
+p2.name = "Tom" // ok
+\end{lstlisting}
+
+\subsection{Copy-on Write Example}
+in objective C many types immutable and mutable variant. Are all reference types. inherit from their immutable counter part. swift prefers value types and uses copy on write to only make deep copies when needed.
+\begin{lstlisting}
+import Foundation // objective C class
+struct MyData {
+   var data = Box(NSMutableData()) // Buffer
+   var dataForWriting: NSMutableData {
+      mutating get { // non mutable by default
+         if isKnownUniquelyReference(&data) {
+           return data.value }
+         data = Box(data.value.mutableCopy() as! NSMutableData)
+         return data.value }}
+   mutating func append(_ bytes: [UInt8]) { // makes copy if needed
+      dataForWriting.append(bytes, length: bytes.count) }  }
+class Box<T> { // isKnownUniq... only works with swift
+   let value: T  // needs helper class
+   init(_ value: T) {
+      self.value = value } }
+var data = MyData()
+var copy = data // shallow copy
+for _ in 0..<10 { // only 1. it deep copy
+   data.append([0x0b,0xad,0xf0,0x0d])}
+\end{lstlisting}
+
+\subsection{Enums}
+\begin{lstlisting}
+public enum Optional<Wrapped> {
+   case none
+   case some(Wrapped) }
+---
+import Foundation
+enum Result<T> {
+   case success(T)
+   casse error(String) }
+func fetch(_ urlString: String) -> Result<String> {
+   guard let url = URL(string: urlString) else {return .error("invalid")}
+   guard let html = try? String(contentsOf: url, encoding .utf8) else {
+      return .error("connection error") }
+   return .success(html) }
+let result = fetch("http://example.com)
+switch result {
+   case .success(let html):
+      print(html)
+   case .error(let message):
+      print(message)
+}
+\end{lstlisting}
+
+\subsection{Operators}
+Most are defined in STL but assignment operators. Can overload existing op for own types. Can add new. pre-post-infix.
+Postfix > Prefix > Infix. Precedence groups: Multiplication (*,\&,\%) > Addition (+,\& +,|,hoch) > Casting(as,as?,is) > Comparison > LogicalConjunction > LogicalDisjunction (||)  = Default >  Ternary (?:) > Assignment.
+
+\subsection{Overloading an existing prefix / infix operators}
+\begin{lstlisting}
+struct Vec2D {
+   var x: Int
+   var y: Int }
+prefix func -(v: Vec2D) -> Vec2D {
+   return Vec2D(x: -v.x, y: -v.y) }
+let v1 = Vec2D(x: 1, y: 2)
+let v2 = Vec2D(x: 4, y: 2)
+print(-v1) // -1, -2
+//func +(lhs: Vec2D, rhs: Vec2D) -> Vec2D {
+//   return Vec2D(x: lhs.x + rhs.x, y: lhs.y + rhs.y) }
+static func +(lhs: Vec2D, rhs: Vec2D) -> Vec2D { //more performant, typechecker only needs to look in here
+   return Vec2D(x: lhs.x + rhs.x, y: lhs.y + rhs.y) }
+print(v1 + v2)
+\end{lstlisting}
+
+\subsection{Adding a new prefix / postfix / infix Operator}
+\begin{lstlisting}
+postfix operator ++
+prefix operator ++
+prefix func ++(x: inout Int) -> Int {
+x += 1
+return x}
+postfix func ++(x: inout Int) -> Int {
+let oldx = x
+x += 1
+return oldx }
+---
+infix operator ** // Default Presedence
+func **(lhs: Int, rhs: Int) -> Int {
+   return Array(repeating: lhs, count: rhs).reduce(1,*) }
+print (10 ** 3 ** 2) // left or right first? add ()
+---
+infix operator **: MultiplicationPrecedence
+func **(lhs: Int, rhs: Int) -> Int {
+return Array(repeating: lhs, count: rhs).reduce(1,*) }
+\end{lstlisting}
+
+
+\subsection{Protocols like interface in java (struct, enum, class)}
+\begin{lstlisting}
+// can require properties, methods, initializers, subsripts or associated types
+// comparable and hashable inherit from equatable
+public protocol CustomStringConvertible{
+   var description: String{ get } } //requirement
+---
+struct Person: CustomStringConvertible {
+   var name: String
+   var age: Int
+   var description: String {
+      return "\(name) (\(age)) yrs old)"  } }
+let p = Person(name: "Wait", age: 50)
+print(p)  // Walt (50 years old)
+---
+public protocol Equatable {
+   static func ==(lhs: Self, rhs: Self) -> Bool }
+public func !=<T: Equatable<lhs: T, rhs: T) -> Bool {
+   return !(lhs == rhs) }
+---
+struct Point: Equatable {  //  != is for free
+   var x: Int
+   var y: Int
+   static func ==(lhs: Point, rhs: Point) -> Bool {
+      return lhs.x == rhs.x && lhs.y == rhs.y } }
+---
+public protocol ExpressibleByArrayLiterl {
+   assisiotedtype Element
+   init(arrayLiteral elements: Element...) }
+---
+struct MyCollection<T>: ExpressibleByArrayLiteral {
+   let elements: [T]
+   init(arrayLiteral elements T...) {
+      self.elements = elements } }
+let mc: MyCollection<Int> = [1, 2, 3]
+\end{lstlisting}
+
+\subsection{Extensions}
+add new computed property, initializer, method or subscript to existing type (class, struct, enum or protocol). also used to group related methods (e.g. methods required by the same protocol). Also works for stl types.
+\begin{lstlisting}
+extenstion Int {
+   func times(_ action: () -> ()) {
+      for _ in 0..<self {
+         action() } } }
+5000.times {
+   print("Please hold the line.") }
+---
+extension Sequence where Iterator.Element == Int {
+   func average() -> Double {
+      var sum = 0, count = 0
+      for n in self {
+         sum += n
+         count += 1 }
+      return Double(sum) / Double(count) } }
+let range = 1...6 // or array [1,2,3]
+print(range.average())
+\end{lstlisting}
+
+\subsection{Protocol Extension}
+classes have many drawbacks: implicit sharing because of reference semantics, inheritance leads to high coupling between related classes. benefits of protocol oriented programming: works with value types (structs, enums) and ref types. less coupling, static type relationship. first step for a new abstraction should always be a protocol.
+\begin{lstlisting}
+protocol Human {
+var firse: String { get }
+var last: String { get }
+var age: Int { get } }
+extension Human {
+var fullName: String { return first + " " + last }
+func isAdult() -> Bool { return age >= 18 } }
+struct Person: Human {
+var first: String
+var last: String
+var age: Int }
+\end{lstlisting}
+
+\subsection{Sequence}
+may be destructive, infinite. All sequences = map(), reduce(), filter(), reversed(). With equatable elements: contains(), starts(with:). With Comparable: max(), min(), lexicographicallyPrecedes(). Collection = sequence whose elements can be traversed multiple times, nondestructively and accessed by indexed subscript. (inherits from sequence, must be finite). BidirectionalCollection = supports backward and forward traversal (inherits from collection). RandomAccessCollection = efficient random-access index traversal (inherits from bidirectional).
+\begin{lstlisting}
+public protocol Sequence {
+   associatedtype Iterator : IteratorProtocol
+   func makeIterator() -> Iterator }
+public protocol IteratorProtocol {
+   associatedtype Element
+   mutating func next() -> Element? }
+---
+struct FibonacciSequence: Sequence {
+   let count: Int
+   func makeIterator() -> FibonacciIterator {
+      return FibonacciIterator(self) } }
+struct FibonacciIterator: IteratorProtocol {
+   var previous = 0, current = 1, remaining: Int
+   init(_ sequence: FibonacciSequence) { self.remaining = sequence.count }
+   mutating func next() -> Int? {
+      guard remaining > 0 else { return nil }
+      defer {
+         (previous, current) = (current, previous + current)
+         remaining -= 1 }
+      return current } }
+let numbers = FibonacciSequence(count: 10)
+for n in numbers { print(n) }
+//print(//numbers.reversed() // contains(13)
+print(numbers.filter { $0 % 2 == 0 } )
+\end{lstlisting}
+
+\subsection{Mutating Method}
+Explanation: In struct types, we need to tell the compiler, which methods are mutating the state of the instance.In the example below, the method inc() increments the stored property count and is therefore clearly altering the state of the Counter instance. Thus, it has to be marked with the 'mutating' modifier.If we would create a new Counter instance with the let keyword, we could not call the inc() method.This makes sense, because let means that the instance should be immutable and inc() is a mutating method.
+can not be called for instances of this struct that are declared with let. Same concept as C++ const. Property setters are implicitly mutating.
+\begin{lstlisting}
+struct Counter {
+private(set) var count: Int
+
+mutating func inc() {
+count += 1 } }
+
+var counter = Counter(count: 0)
+print(counter.count)
+counter.inc()
+counter.inc()
+print(counter.count)
+\end{lstlisting}
+
+\subsection{AutoClosure}
+We expect that the logical conjunction operator has the same short-circuiting behaviour as in other languages. In other words, when the first operand evaluates to false, the second operand is not evaluated, because it's already clear that the result of the entire expression will be false. The way this is implemented in Swift is with a closure that has an autoclosure attribute. This way, the second operand is automatically wrapped inside a closure which will only be called, when lhs is true:
+infix operator \&\&\&: LogicalConjunctionPrecedence
+\begin{lstlisting}
+func &&&(lhs: Bool, rhs: @autoclosure () -> Bool) -> Bool {
+if lhs {
+return rhs() }
+return false }
+func f() -> Bool {
+print("f() is called")
+return true }
+print(true &&& f())     // f() is called; result is true
+print(false &&& f())	// f() is not called; result is false
+\end{lstlisting}
+
+
+\subsection{Application Delegate}
+@UIApplicationMain attribute creates entry point to your app and a run loop that delivers input events to your app.
+\begin{lstlisting}
+import UIKit
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate  {
+var window: UIWindow?
+func application(_ application: UIApplication,
+didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
+window = UIWindow(frame: UIScreen.main.bounds)
+window?.rootViewController = ViewController()
+window?.makeKeyAndVisible()
+return true } }
+\end{lstlisting}
+
+\subsection{Configuring the Navigation Bar}
+\begin{lstlisting}
+class ViewControlle: UIViewController {
+override func viewDidLoad() {
+super.viewDidLoad()
+title = "Hello, world" // implicitly sets naviationItem.title
+let rithItem = UIBarButtonItem(barButtonSystemItem: .play, target: self, action: #selector(play))
+navigationItem.rightBarButtonItem = rightItem }
+func play() { print("play something")} }
+\end{lstlisting}
+
+\subsection{Preparing a segue}
+\begin{lstlisting}
+override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+switch segue.identifier! {
+case "ShowAddShowTableViewController":
+let nc = segue.destination as! UINavigationController
+let tvc = nc.topViewController as! AddShowTableViewController
+tvc.coreDataStack = coreDataStack
+case "ShowEpisodes":
+let tvc = segue.destination as! EpisodeViewController
+guard let indexPath = tableView.indexPathForSelectedRow else {return}
+tvc.show = fetchedResultsController.object(at: indexPath)
+default:
+fatalError() } }
+\end{lstlisting}
+
+
+\subsection{TODO EXAMPLE FOR UI (AUTOLAYOUT)-> FROM EXERCISES (IT WILL BE IN THE EXAM)}
+
+
+\subsection{Common Views and Controls}
+\begin{lstlisting}
+override func viewDidLoad() {
+super.viewDidLoad()
+let label = UILabel()
+let button = UIButton(type: .custom)
+let file = UITextField()
+let image = UIImage(named: "kitten")
+let iv = UIImageView(image: image)
+view.addSubView(iv) // or label button...
+label.text = "Hello, World"
+label.font = UIFont(name: "Chalkduster", size: 40)
+label.textColor = UIColor.orange
+button.setTitle("Do Something", for: .normal)
+button.setTitleColor(UIColor.purple, for: .highlighted)
+button.addTarget(self, action: #selector(doSomething), for: .touchUpInside)
+field.borderStyle = .roundedRect
+field.placeholder = "Username"
+field.addTarget(self, action: #selector(doSomething), for: .editingChanged)
+//translateAutoresizingMaskIntoContraints false, leftAnchor.constraint, right.}
+fund doSomething(sender: UITextField) { //empty for Button
+if let text = sender.text { print(test) } }
+\end{lstlisting}
+
+\subsection{Outlet and Actions}
+\begin{lstlisting}
+import UIKit
+class ViewController: UIViewController {
+@IBOutlet weak var nameLabel: UILabel!
+override func viewDidLoad() {
+super.viewDidLoad()
+nameLabel.text = "Tom"} }
+@IBAction func buttonPressed(_ sender: AnyObject){
+..} // attibute ignored by compiler, par could also be UIButton
+\end{lstlisting}
+
+\subsection{TableViews}
+\begin{lstlisting}
+//example 1 without sections
+class ViewController: UITableViewController {
+let months = ["January", "February" ...]
+override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
+return months.count}
+override func tableView(_ tableView: UITableView, cellForRowAt indexPath: indexPath) -> UITableViewCell {
+let cell = tableView.dequeueReusableCell(withIdentifier: "CellIdentifier", for: indexPath)
+cell.textLabel?.text = months[indexPath.row]
+cell.accessoryType = .disclosureIndicator
+return cell }
+override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+tableView.deselectRow(at: indexPath, animated: true)
+print("selected"\(months[indexPath.row])")} }
+//example 2 with sections class not written again
+let seasons = [Season(name: "Spring", months: ["Mar","Apr","May"]),...]
+override func numberOfSections(in tableView: UITableView) -> Int { return seasons.count}
+override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+return seasons[section].months.count}
+override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+return seasons[section].name}
+override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+let cell = tableView.dequeueReusableCell(withIdentifier: "CellIdentifier", for: indexPath)
+cell.textLabel?.text = season[indexPath.section].months[indexPath.row]
+return cell}
+\end{lstlisting}
+
+\subsection{MVC}
+\begin{lstlisting}
+class GreetingViewController: UIViewController {
+var person: Person!
+@IBOutlet weak var greetingLabel: UILabel!
+override func viewDidLoad() {
+super.viewDidLoad()
+greetingLabel.text = "Tap the button" }
+@IBAction func didTapButton(_ sender: Any) {
+greetingLabel.text = "Hello " + person.firstName} }
+\end{lstlisting}
+
+\subsection{MVP}
+\begin{lstlisting}
+protocol GreetingView: class {
+func setGreeting(_ greeting: String) }
+class GreetingViewController: UIViewController, GreetingView {
+var presenter: GreetingPresenter!
+@IBOutlet weak var greetingLabel: UILabel!
+override func viewDidLoad() {
+super.viewDidLoad()
+presenter.initializeUI() }
+@IBAction func didTapButton(_ sender: Any) { presenter.showGreeting() }
+func setGreeting(_ greeting: String) { greetingLabel.text = greeting } }
+
+class GreetingPresenter {
+weak var view: GreetingView?
+let person: Person
+init(view: GreetingView, person: Person) {
+self.view = view
+self.person = person }
+func initializeUI() {
+view?.setGreeting("Tap the button") }
+func showGreeting() {
+let greeting = "Hello" + " " + person.firstName + " " + person.lastName
+view?.setGreeting(greeting) } }
+
+class GreetingMVPTests: XCTestCase {
+class MockGreetingView: GreetingView {
+var greeting: String!
+func setGreeting(_ greeting: String) {
+self.greeting = greeting } }
+func testShowGreeting() {
+let view = MockGreetingView()
+let presenter = GreetingPresenter(view: view,
+person: Person(firstName:"First", lastName:"Last"))
+presenter.showGreeting()
+XCTAssertEqual("Hello First Last", view.greeting) }
+// more tests... }
+\end{lstlisting}
+
+\subsection{MVVM}
+\begin{lstlisting}
+import RxSwift
+class GreetingViewModel: NSObject {
+let person: Person
+let greetingText = Variable<String>("")
+init(person: Person) {
+self.person = person }
+func initializeUI() {
+greetingText.value = "Tap the button" }
+func showGreeting() {
+greetingText.value = "Hello " + person.firstName + " " + person.lastName } }
+
+import UIKit
+import RxSwift
+import RxCocoa
+class GreetingViewController: UIViewController {
+var vm: GreetingViewModel!
+let disposeBag = DisposeBag() // removes observer when view controller is deinitialized
+@IBOutlet weak var greetingLabel: UILabel!
+@IBOutlet weak var button: UIButton!
+override func viewDidLoad() {
+super.viewDidLoad()
+vm.initializeUI()
+button.addTarget(vm, action: #selector(vm.showGreeting), for: .touchUpInside)
+vm.greetingText.asObservable().bindTo(greetingLabel.rx.text)
+.addDisposableTo(disposeBag) } }
+
+class GreetingMVVMTests: XCTestCase {
+func testInitializeUI() {
+let vm = GreetingViewModel(person: Person(firstName: "First", lastName: "Last"))
+vm.initializeUI()
+XCTAssertEqual("Tap the button", vm.greetingText.value) }
+func testShowGreeting() {
+let vm = GreetingViewModel(person: Person(firstName: "First", lastName: "Last"))
+vm.showGreeting()
+XCTAssertEqual("Hello First Last", vm.greetingText.value)} }
+\end{lstlisting}
+
+
+
+%\subsection{TODO}
+%\begin{lstlisting}
+%\\AppDelegate.swift
+%import UIKit
+%import CoreData
+%
+%@UIApplicationMain
+%class AppDelegate: UIResponder, UIApplicationDelegate {
+%let coreDataStack = CoreDataStack()
+%var window: UIWindow?
+%
+%func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+%let nav = window!.rootViewController as! UINavigationController
+%let itemsTVC = nav.topViewController as! ItemsTableViewController
+%itemsTVC.coreDataStack = coreDataStack
+%return true
+%}
+%
+%func applicationWillTerminate(_ application: UIApplication) {
+%coreDataStack.saveContext()
+%}
+%}
+%\\ CoreDataStack.swift
+%import Foundation
+%import CoreData
+%
+%final class CoreDataStack {
+%lazy var persistentContainer: NSPersistentContainer = {
+%let container = NSPersistentContainer(name: "ToDo")
+%container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+%if let error = error {
+%fatalError(error.localizedDescription)
+%}
+%})
+%return container
+%}()
+%
+%var context: NSManagedObjectContext {
+%return persistentContainer.viewContext
+%}
+%
+%func saveContext () {
+%if context.hasChanges {
+%try! context.save()
+%}
+%}
+%}
+%//ItemsTableViewController.swift
+%import UIKit
+%import CoreData
+%
+%class ItemsTableViewController: UITableViewController {
+%var coreDataStack: CoreDataStack!
+%var fetchedResultsController: NSFetchedResultsController<Item>!
+%
+%override func viewDidLoad() {
+%super.viewDidLoad()
+%
+%let fetchRequest: NSFetchRequest<Item> = Item.fetchRequest()
+%fetchRequest.sortDescriptors = [NSSortDescriptor(key: "created", ascending: false)]
+%fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: coreDataStack.context, sectionNameKeyPath: nil, cacheName: nil)
+%fetchedResultsController.delegate = self
+%
+%try! fetchedResultsController.performFetch()
+%}
+%
+%@IBAction func addItem(_ sender: Any) {
+%let alertController = UIAlertController(title: "New Item", message: nil, preferredStyle: .alert)
+%alertController.addTextField()
+%alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+%alertController.addAction(UIAlertAction(title: "OK", style: .default) { action in
+%self.createItem(text: alertController.textFields!.first!.text!)
+%})
+%present(alertController, animated: true)
+%}
+%
+%func createItem(text: String) {
+%let item = Item(context: coreDataStack.context)
+%item.created = Date()
+%item.text = text
+%item.done = false
+%coreDataStack.saveContext()
+%}
+%
+%func toggleItem(_ item: Item) {
+%item.done = !item.done
+%coreDataStack.saveContext()
+%}
+%
+%func deleteItem(_ item: Item) {
+%coreDataStack.context.delete(item)
+%coreDataStack.saveContext()
+%}
+%
+%override func numberOfSections(in tableView: UITableView) -> Int {
+%return fetchedResultsController.sections?.count ?? 0
+%}
+%
+%override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+%return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+%}
+%
+%override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+%let cell = tableView.dequeueReusableCell(withIdentifier: "ItemCell", for: indexPath)
+%let item = fetchedResultsController.object(at: indexPath)
+%cell.textLabel?.text = item.text
+%cell.accessoryType = item.done ? .checkmark : .none
+%return cell
+%}
+%
+%override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+%tableView.deselectRow(at: indexPath, animated: true)
+%
+%let item = fetchedResultsController.object(at: indexPath)
+%toggleItem(item)
+%tableView.cellForRow(at: indexPath)?.accessoryType = item.done ? .checkmark : .none
+%}
+%
+%override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+%return true
+%}
+%
+%override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+%if editingStyle == .delete {
+%let item = fetchedResultsController.object(at: indexPath)
+%deleteItem(item)
+%}
+%}
+%}
+%
+%extension ItemsTableViewController: NSFetchedResultsControllerDelegate {
+%func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+%self.tableView.beginUpdates()
+%}
+%
+%func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+%switch type {
+%case .insert:
+%if let newIndexPath = newIndexPath {
+%tableView.insertRows(at: [newIndexPath], with: .automatic)
+%}
+%case .delete:
+%if let indexPath = indexPath {
+%tableView.deleteRows(at: [indexPath], with: .automatic)
+%}
+%case .update:
+%if let indexPath = indexPath {
+%tableView.reloadRows(at: [indexPath], with: .automatic)
+%}
+%case .move:
+%if let indexPath = indexPath, let newIndexPath = newIndexPath  {
+%tableView.moveRow(at: indexPath, to: newIndexPath)
+%}
+%}
+%}
+%
+%func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+%self.tableView.endUpdates()
+%}
+%}
+%//Item+CoreDataClass.swift
+%import Foundation
+%import CoreData
+%
+%
+%public class Item: NSManagedObject {
+%
+%}
+%//Item+CoreDataProperties.swift
+%import Foundation
+%import CoreData
+%
+%
+%extension Item {
+%
+%@nonobjc public class func fetchRequest() -> NSFetchRequest<Item> {
+%return NSFetchRequest<Item>(entityName: "Item");
+%}
+%@NSManaged public var text: String
+%@NSManaged public var done: Bool
+%@NSManaged public var created: Date
+%}
+%\end{lstlisting}
+
+%\subsection{MVC}
+%\begin{lstlisting}
+%//AppDelegate.swift
+%import UIKit
+%
+%@UIApplicationMain
+%class AppDelegate: UIResponder,
+%  UIApplicationDelegate { var window: UIWindow?
+%
+%   func application(_ application: UIApplication,
+%     didFinishLaunchingWithOptions launchOptions:
+%     [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+%   let greetingViewController = window?.rootViewController as! GreetingViewController
+%   //
+%   greetingViewController.person =
+%     Person(firstName: "Chris", lastName: "Lattner")
+%   //
+%   return true
+%   }
+%}
+%// GreetingController.swift
+%import UIKit
+%
+%class GreetingViewController: UIViewController {
+%var person: Person!
+%@IBOutlet weak var greetingLabel: UILabel!
+%
+%override func viewDidLoad() {
+%super.viewDidLoad()
+%
+%greetingLabel.text = "Tap the button"
+%}
+%
+%@IBAction func didTapButton(_ sender: Any) {
+%greetingLabel.text = "Hello " + person.firstName + " " + person.lastName
+%}
+%}
+%// Person.swift
+%struct Person {
+%   let firstName: String
+%   let lastName: String
+%}
+%\end{lstlisting}
+%
+%\subsection{MVP}
+%\begin{lstlisting}
+%//AppDelegate.swift
+%...
+%   let greetingPresenter = GreetingPresenter(view: greetingViewController, person: Person(firstName: "Chris", lastName: "Lattner"))
+%   greetingViewController.presenter = greetingPresenter
+%//GreetingPresenter.swift
+%import Foundation
+%
+%class GreetingPresenter {
+%   weak var view: GreetingView?
+%   let person: Person
+%   init(view: GreetingView, person: Person) {
+%      self.view = view
+%      self.person = person
+%   }
+%   func initializeUI() {
+%      view?.setGreeting("Tap the button")
+%   }
+%   func showGreeting() {
+%      let greeting = "Hello" + " " + person.firstName + " " + person.lastName
+%      view?.setGreeting(greeting)
+%   }
+%}
+%//GreetingViewController.swift
+%import UIKit
+%protocol GreetingView: class {
+%   func setGreeting(_ greeting: String)
+%}
+%class GreetingViewController: UIViewController, GreetingView {
+%   var presenter: GreetingPresenter!
+%   @IBOutlet weak var greetingLabel: UILabel!
+%   override func viewDidLoad() {
+%      super.viewDidLoad()
+%   presenter.initializeUI()
+%   }
+%   @IBAction func didTapButton(_ sender: Any) {
+%      presenter.showGreeting()
+%   }
+%   func setGreeting(_ greeting: String) {
+%      greetingLabel.text = greeting
+%   }
+%}
+%//GreetingMVPTests.swift
+%import XCTest
+%@testable import GreetingMVP
+%
+%class GreetingMVPTests: XCTestCase {
+%class MockGreetingView: GreetingView {
+%var greeting: String!
+%
+%func setGreeting(_ greeting: String) {
+%self.greeting = greeting
+%}
+%}
+%
+%func testInitializeUI() {
+%let view = MockGreetingView()
+%let presenter = GreetingPresenter(view: view, person: Person(firstName: "Firstname", lastName: "Lastname"))
+%presenter.initializeUI()
+%XCTAssertEqual("Tap the button", view.greeting)
+%}
+%
+%func testShowGreeting() {
+%let view = MockGreetingView()
+%let presenter = GreetingPresenter(view: view, person: Person(firstName: "Firstname", lastName: "Lastname"))
+%presenter.showGreeting()
+%XCTAssertEqual("Hello Firstname Lastname", view.greeting)
+%}
+%}
+%\end{lstlisting}
+%
+%\subsection{MVVM}
+%\begin{lstlisting}
+%//AppDelegate.swift
+%...
+%   greetingViewController.viewModel = GreetingViewModel(person: Person(firstName: "Chris", lastName: "Lattner"))
+%//GreetingViewController.swift
+%import UIKit
+%import RxSwift
+%import RxCocoa
+%class GreetingViewController: UIViewController {
+%   var viewModel: GreetingViewModel!
+%   let disposeBag = DisposeBag()
+%   @IBOutlet weak var greetingLabel: UILabel!
+%   @IBOutlet weak var button: UIButton!
+%   override func viewDidLoad() {
+%      super.viewDidLoad()
+%      viewModel.initializeUI()
+%      button.addTarget(viewModel, action: #selector(viewModel.showGreeting), for: .touchUpInside)
+%      viewModel.greetingText.asObservable().bindTo(greetingLabel.rx.text).addDisposableTo(disposeBag)
+%   }
+%}
+%//GreetingViewModel.swift
+%import RxSwift
+%
+%class GreetingViewModel: NSObject {
+%   let person: Person
+%   let greetingText = Variable<String>("")
+%   init(person: Person) {
+%      self.person = person
+%   }
+%   func initializeUI() {
+%      greetingText.value = "Tap the button"
+%   }
+%   func showGreeting() {
+%      greetingText.value = "Hello " + person.firstName + " " + person.lastName
+%   }
+%}
+%//GreetingMVVMTest
+%import XCTest
+%@testable import GreetingMVVM
+%class GreetingMVVMTests: XCTestCase {
+%   func testInitializeUI() {
+%      let viewModel = GreetingViewModel(person: Person(firstName: "Firstname", lastName: "Lastname"))
+%      viewModel.initializeUI()
+%      XCTAssertEqual("Tap the button", viewModel.greetingText.value)
+%   }
+%   func testShowGreeting() {
+%      let viewModel = GreetingViewModel(person: Person(firstName: "Firstname", lastName: "Lastname"))
+%      viewModel.showGreeting()
+%      XCTAssertEqual("Hello Firstname Lastname", viewModel.greetingText.value)
+%   }
+%}
+%\end{lstlisting}
+
+\subsection{Contacts}
+\begin{lstlisting}
+//AppDelegate.swift
+import UIKit
+
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+var window: UIWindow?
+}
+//PeopleViewController.swift
+import UIKit
+
+class PeopleViewController: UITableViewController {
+let people = [Person(name: "Anna", birthday: "01.05.1955", phone: "012 345 67 89", email: "anna@example.com"),
+Person(name: "Jenny", birthday: "17.09.2001", phone: "012 345 67 89", email: "jenny@example.com"),
+Person(name: "John", birthday: "10.07.1975", phone: "012 345 67 89", email: "john@example.com"),
+Person(name: "Tom", birthday: "05.10.1988", phone: "012 345 67 89", email: "tom@example.com"),
+Person(name: "Walter", birthday: "24.12.1969", phone: "012 345 67 89", email: "walter@example.com")]
+
+override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+return people.count
+}
+
+override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+let cell = tableView.dequeueReusableCell(withIdentifier: "ContactCell", for: indexPath)
+let person = people[indexPath.row]
+cell.textLabel?.text = person.name
+cell.accessoryType = .disclosureIndicator
+return cell
+}
+
+override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+switch segue.identifier! {
+case "ShowPerson":
+let personViewController = segue.destination as! PersonViewController
+personViewController.person = people[tableView.indexPathForSelectedRow!.row]
+default:
+fatalError()
+}
+}
+}
+//Person.swift
+import Foundation
+
+struct Person {
+let name: String
+let birthday: String
+let phone: String
+let email: String
+}
+//PersonViewController
+import UIKit
+
+class PersonViewController: UIViewController {
+var person: Person!
+
+@IBOutlet weak var nameLabel: UILabel!
+@IBOutlet weak var birthdayLabel: UILabel!
+@IBOutlet weak var phoneLabel: UILabel!
+@IBOutlet weak var emailLabel: UILabel!
+
+override func viewDidLoad() {
+super.viewDidLoad()
+
+title = person.name
+nameLabel.text = person.name
+birthdayLabel.text = person.birthday
+phoneLabel.text = person.phone
+emailLabel.text = person.email
+}
+}
+\end{lstlisting}
+
+\subsection{REST Countries}
+\begin{lstlisting}
+//APPDelegate.swift
+import UIKit
+
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+var window: UIWindow?
+}
+//APIClient.swift
+import Foundation
+
+enum Result<T> {
+case success(T)
+case error(String)
+}
+
+final class APIClient {
+let session: URLSession
+
+init() {
+let configuration = URLSessionConfiguration.default
+configuration.httpAdditionalHeaders = ["Accept": "application/json"]
+configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+session = URLSession(configuration: configuration)
+}
+
+func getCountries(callback: @escaping (Result<[Country]>) -> Void) {
+let url = URL(string: "https://restcountries.eu/rest/v1/all")!
+session.dataTask(with: url) { (data, response, error) in
+let result = self.getResult(data: data, response: response, error: error)
+
+OperationQueue.main.addOperation {
+callback(result)
+}
+}.resume()
+}
+
+func getResult(data: Data?, response: URLResponse?, error: Error?) -> Result<[Country]> {
+guard error == nil else {
+return .error(error!.localizedDescription)
+}
+
+guard let response = response as? HTTPURLResponse,
+200..<300 ~= response.statusCode,
+let data = data else {
+return .error("Server Error")
+}
+
+guard let json = try? JSONSerialization.jsonObject(with: data),
+let countries = parseCountries(json) else {
+return .error("Invalid data")
+}
+
+return .success(countries)
+}
+
+func parseCountries(_ json: Any) -> [Country]? {
+guard let arrayOfJsonDicts = json as? [[String: Any]] else { return nil }
+return arrayOfJsonDicts.flatMap { Country(json: $0) }
+}
+}
+// CountriesViewController.swift
+import UIKit
+
+class CountriesViewController: UITableViewController {
+var countries: [Country] = []
+
+override func viewDidLoad() {
+super.viewDidLoad()
+
+let client = APIClient()
+client.getCountries { result in
+switch result {
+case .success(let countries):
+self.countries = countries
+self.tableView.reloadData()
+case .error(let message):
+let alertController = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+alertController.addAction(UIAlertAction(title: "OK", style: .default))
+self.present(alertController, animated: true)
+}
+}
+}
+
+override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+return countries.count
+}
+
+override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+let cell = tableView.dequeueReusableCell(withIdentifier: "CountryCell", for: indexPath) as! CountryCell
+let country = countries[indexPath.row]
+cell.countryLabel.text = country.name
+
+let capital = country.capital.isEmpty ? "N/A" : country.capital
+cell.capitalLabel.text = "Capital: \(capital)"
+
+let formatter = NumberFormatter()
+formatter.groupingSeparator = "'"
+formatter.usesGroupingSeparator = true
+formatter.groupingSize = 3
+let population = country.population == 0 ? "N/A" : formatter.string(from: country.population as NSNumber)!
+cell.populationLabel.text = "Population: \(population)"
+
+return cell
+}
+}
+// Country.swift
+struct Country {
+let name: String
+let capital: String
+let population: Int
+
+init?(json: [String: Any]) {
+guard let name = json["name"] as? String,
+let capital = json["capital"] as? String,
+let population = json["population"] as? Int else {
+return nil
+}
+
+self.name = name
+self.capital = capital
+self.population = population
+}
+}
+// CountryCell.swift
+import UIKit
+
+class CountryCell: UITableViewCell {
+@IBOutlet weak var countryLabel: UILabel!
+@IBOutlet weak var capitalLabel: UILabel!
+@IBOutlet weak var populationLabel: UILabel!
+}
+\end{lstlisting}
+
+\subsection{Auto Layout}
+\begin{lstlisting}
+import ​ ​ UIKit
+class ​ ​ ViewController ​ : ​ UIViewController ​ {
+let ​ ​ container ​ = ​ UIView ​ ()
+let ​ ​ label ​ = ​ UILabel ​ ()
+let ​ ​ textField ​ = ​ UITextField ​ ()
+let ​ ​ button ​ = ​ UIButton ​ ()
+override ​ ​ func ​ ​ viewDidLoad ​ () {
+super ​ .viewDidLoad()
+view.addSubview(container)
+container.backgroundColor = ​ UIColor ​ .orange
+container.translatesAutoresizingMaskIntoConstraints = ​ false
+container.leftAnchor.constraint(equalTo: view.leftAnchor, constant: ​ 20 ​ ).isActive = ​ true
+container.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = ​ true
+container.heightAnchor.constraint(equalToConstant: ​ 100.0 ​ ).isActive = ​ true
+container.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = ​ true
+view.addSubview(label)
+label.text = ​ "Login-Form"
+label.translatesAutoresizingMaskIntoConstraints = ​ false
+label.leftAnchor.constraint(equalTo: container.leftAnchor, constant: ​ 5 ​ ).isActive = ​ true
+label.bottomAnchor.constraint(equalTo: container.topAnchor, constant: ​ - ​ 5 ​ ).isActive = ​ true
+container.addSubview(textField)
+textField.placeholder = ​ "Enter Password"
+textField.borderStyle = .roundedRect
+textField.translatesAutoresizingMaskIntoConstraints = ​ false
+textField.widthAnchor.constraint(equalTo: container.widthAnchor, multiplier: ​ 0.5 ​ ).isActive = ​ true
+textField.centerXAnchor.constraint(equalTo: container.centerXAnchor).isActive = ​ true
+textField.topAnchor.constraint(equalTo: container.topAnchor, constant: ​ 20 ​ ).isActive = ​ true
+}
+container.addSubview(button)
+button.setTitle( ​ "Login" ​ , ​ for ​ : .normal)
+button.setTitleColor(.blue, ​ for ​ : .normal)
+button.translatesAutoresizingMaskIntoConstraints = ​ false
+button.centerXAnchor.constraint(equalTo: container.centerXAnchor).isActive = ​ true
+button.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: ​ 10 ​ ).isActive = ​ true
+}
+\end{lstlisting}
