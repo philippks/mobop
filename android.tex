@@ -23,6 +23,82 @@ API interface, Activity manager (Manages the application life cycle).
 \textbf{Applications:}
 Built-in and user applications. Can replace built-in applications.
 
+\subsection{Security}
+\textbf{Key features}
+
+\textbf{Robust security through a kernel derived from Linux 3.10.x.}
+Three-class file system permissions (Prevents user A from reading user B’s
+files unless A has group or world privileges). Process isolation (Prevents user
+A from exhausting user B’s memory, CPU resources, devices). Extensible
+mechanism for secure inter-process communication.
+
+\textbf{Mandatory application sandbox for all applications.}
+each app has its own User-ID (UID) and runs as a dedicated process. Rooting the
+device and running apps as root breaks security from this sandbox as root has
+full access to all application data.
+
+\textbf{Secure inter-process communication}
+The Android manifest tells the system which top-level components (activities,
+services, etc.) may receive which intents. Services can provide interfaces
+directly accessible using binder. Content providers expose data over process
+boundaries.
+
+
+\textbf{Application signing}
+Package manager and Google Play verify signatures with public key but do not
+verify the Certificate Authority.
+
+\textbf{Application-defined and user-granted permissions}
+Sensitive APIs can only be accessed with app-defined and user-granted
+permissions. Access without permission yields a security exception.
+
+\includegraphics[width=0.15\textwidth]{android/permission_types.png}
+
+important permissions:
+\begin{lstlisting}
+$READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, INTERNET, CALL_PHONE, WAKE_LOCK,
+READ_SMS, RECEIVE_SMS, READ_CONTACTS, ACCESS_FINE_LOCATION, BROADCAST_STICKY$
+\end{lstlisting}
+
+\subsubsection{Bouncer}
+Google tests apps for malicious behavior through a service called Bouncer (it
+tests the app in their cloud infrastructure). Google play remains as of today a
+major channel of malware distribution. Majority of infections is through free
+illegitimate copies of paid content \textbf{(„re-packaging“)}.
+
+\subsubsection{Exploitability and attack vectors}
+\textbf{Worm:} The main objective of this stand-alone type of malware is to endlessly
+reproduce itself and spread to other devices
+
+\textbf{Trojan}: a Trojan horse always requires user interaction to be
+activated. A Trojan is a kind of virus that is usually inserted into attractive
+and seemingly non-malicious executable files or applications that are are
+downloaded to the device and executed by the user.
+
+\textbf{Spyware}: This type of malware poses a threat to mobile devices by
+collecting, using, and spreading the user's personal or sensitive information
+without consent or knowledge
+
+\textbf{Ghost Push}: This is type of malware which infects the Android OS by
+automatically gaining root access, downloading malicious software, converting
+it to the system app and then losing root access which makes it virtually
+impossible to remove the infection by factory reset unless the firmware is
+reflashed.
+
+\subsubsection{Native Executable Control}
+All current exploit-based attacks depend on the ability to execute native code
+outside the Android run-time VM.
+
+\subsubsection{Propagation Scenarios}
+Direct self-spreading mechanisms over primary communication networks known from
+desktop environments are unlikely. More likely spreading mechanisms involve
+Google Play and third party app markets, Websites, Infection via personal
+computers, Device-to-device infection, Infection via rogue networks.
+
+\subsubsection{Threat Scenarios}
+Information leakage, Online banking fraud, Classical threats such as espionage,
+eavesdropping, blackmailing, botnet formation, Botnet Scenarios.
+
 \subsection{Components}
 App is built of Components that interacts. Goal: Easy to reuse and replace.
 Components of other apps can be used (e.g. Gallery). Needs to be registered in
@@ -32,23 +108,65 @@ the AndroidManifest (<activity android:name=".ActivityB" />) (else exception).
 User interface component typically corresponding to one screen. (Moving to next
 screen means change of Activity).
 
-\textbf{Service}
+\subsection{Service}
 Runs in the background without user interface.
 Example: music player, network download, etc
 \includegraphics[width=0.15\textwidth]{android/service_example.png}
 
-\textbf{Broadcast Receiver}
+Service have their own lifecycle. Typically start one or more threads to
+perform work outside the UI tread. Always stop services to avoid wasting
+resources and consuming battery power. A started service handling requests
+sequentially can be implemented by extending the IntentService class
+
+\subsection{Broadcast Receiver}
 Component that receives and reacts to broadcast announcements (<- are Intents too).
 Many broadcasts originate in system code (E.g., announcements that the time
 zone has changed, that the battery is low. Incoming SMS)
 Receiver are implemented by extending BroadcastReceiver.
 
-\textbf{Content Provider}
+Register in AndroidManifest (in many cases are permissions needed):
+
+\includegraphics[width=0.15\textwidth]{android/broadcast_receiver.png}
+
+\begin{lstlisting}
+public class BootCompletedListener extends BroadcastReceiver {
+ @Override
+ public void onReceive(Context context, Intent intent) {
+  // do something, when boot has completed
+ }
+}
+\end{lstlisting}
+
+\subsection{Content Provider}
 recommended way to share data between Android applications (E.g. address book,
 photo gallery). Represented by URI and MIME type.
-Applications do not call content providers directly. They call ContentResolvers
-instead as they typically do not reside in the same process.
+Applications do not call content providers directly (may only to read). They
+call ContentResolvers instead as they typically do not reside in the same
+process.
 \includegraphics[width=0.15\textwidth]{android/content_provider.png}
+
+\textbf{Android content provider} $ContactsContract$: All kinds of personal
+data: phone numbers, email addresses etc.. $MediaStore$: Meta data for all
+available media on both internal and external storage devices. $Browser$:
+Bookmarks, search results, etc. $CallLog$: Information about placed and
+received calls. $Settings$: Global system-level device preferences.
+
+The ContentProvider can be accessed from several programs at the same time,
+therefore you must implement the access \textbf{thread-safe}. E.g. add
+$synchronized$ to the methods.
+
+\textbf{Content URIs}: addresses for public content.
+\includegraphics[width=0.15\textwidth]{android/content_uri.png}
+A: prefix indicating that the data is controlled by a content provider. B:
+authority part; identifies the content provider. C: path to determine what kind
+of data is being requested. D: ID of the specific record being requested
+(optional).
+
+\textbf{Summary}: Queries to content providers return cursors. Modifying data
+in a content provider by inserts, updates, and deletes goes through content
+resolver. Implementing a content provider requires extending the
+ContentProvider class, overwriting six methods and declaring the content
+provider in the Android manifest.
 
 \subsection{Processes and Threads}
 \textbf{Default:} Applications run in a single Linux process. All components of
@@ -58,7 +176,8 @@ thread” or “UI thread”) within this process
 
 \textbf{Processes may get killed} when memory is low. Which one to kill is
 decided by an importance hierarchy.
-\includegraphics[width=0.15\textwidth]{android/importance_hierarchy.png}
+\includegraphics[width=0.15\textwidth]{android/importance_hierarchy_1.png}
+\includegraphics[width=0.15\textwidth]{android/importance_hierarchy_2.png}
 
 Component ranking may increase if it contains components that serve components
 in higher ranked processes. Thus, we recommend to create a service instead of
@@ -183,6 +302,7 @@ public class EventDBHelper extends SQLiteOpenHelper {
  public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
   db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENTS);
   onCreate(db);
+  // in production migrate the data to the new version!
  }
 }
 \end{lstlisting}
@@ -204,6 +324,16 @@ all result data at a time and thus saves memory. Generally, cursors need to be
 closed. A cursor can be registered at the Activity that performs the query. As
 a consequence the Android system handles closing and re-querying when needed as
 after lifecycle events such as onPause.
+
+\begin{lstlisting}
+SQLiteDatabase db = eventDBHelper.getReadableDatabase();
+Cursor cursor = db.query(TABLE_EVENTS, FROM, null, null, null, null, ORDER_BY);
+while (cursor.moveToNext()) {
+ // Could use getColumnIndexOrThrow() to get indexes
+ long id = cursor.getLong(0);
+ long time = cursor.getLong(1);
+}
+\end{lstlisting}
 
 \subsubsection{Network Connection}
 To send and receive data you may employ the class HttpURLConnection.
@@ -304,7 +434,29 @@ data) {
 }
 \end{lstlisting}
 
+\textbf{Examples}
+\begin{lstlisting}
+Uri url = Uri.parse("http://www.domain.com");
+// use file: or content: for other file types
+Intent i = new Intent(android.content.Intent.ACTION_VIEW, url);
+startActivity(i);
+// if multiple browsers present, android will show choser (options: just once
+or always)
+\end{lstlisting}
 
+\begin{lstlisting}
+// GEO Location replace latitude & longitude
+URI geoLocation = Uri.parse('geo:latitude,longitude')
+Intent intent = new Intent(Intent.ACTION_VIEW);
+intent.setData(geoLocation);
+\end{lstlisting}
+
+\begin{lstlisting}
+// return number of possible activities
+PackageManager pm = context.getPackageManager();
+List<ResolveInfo> activities = pm.queryIntentActivities(intent, PackageManager.MATCH\_DEFAULT\_ONLY);
+activities.size(); // <- possible activities
+\end{lstlisting}
 
 \subsection{Activity Lifecycle}
 State of an activity is managed by the system.
@@ -385,6 +537,22 @@ button.setOnClickListener(mCorkyListener);
 \textbf{Target SDK:} Highest version app is tested for.
 \textbf{Compile With:} Version against app is compiled.
 \textbf{Theme:} Specific Android UI Theme.
+
+\subsection{Testing}
+\textbf{Local unit tests} run on developer’s machine. They should be written
+with JUnit. They're located in $src/test/java$
+
+\textbf{Instrumented tests} run on a device or emulator. They have access to
+instrumentation information, such as the context of the app under test. They're
+located in $src/androidTest/java$.
+
+\subsubsection{Robolectric}
+Robolectric is a unit test framework that simplifies writing Local Unit Tests
+that depend on the Android SDK. Mocking code in the Android SDK is possible but
+it means additional work.  Robolectric has done this for you. Tests run inside
+the JVM on your workstation in seconds (as opposed to instrumented tests).
+Robolectric handles inflation of views, resource loading and more. It runs
+outside of emulator. And alternative is to use Mock Framework (e.g. Mockito).
 
 \subsection{List}
 ListActivity displays items by binding to a data source (\textbf{adapter}:
@@ -509,5 +677,116 @@ actions. Buttons should not take more than 50\% of width. Not too many icons.
 \textbf{Fragments} may contribute actions buttons with $hasOptionsMenu$ in
 $onCreate$. Android calls $onCreateOptionsMenu$ in the fragment.
 
-\newpage
-\subsection{TODO SOME QUESTIONS OF BSKON EXAMS BECAUSE SAME TEACHER AND SAME CONTENT}
+\subsection{Richtig oder Falsch?}
+\includegraphics[width=0.15\textwidth]{android/bskon_1.png}
+
+\subsubsection{Komplett Richtig}
+Android ist ein Software Stack fuer mobile Geräte, der u.a. ein Betriebsystem,
+Middleware und wichtige Anwendungen bereit stellt
+
+Anwendungen von Drittanbietern stellen ihre API zur Verfügung, indem sie die
+Komponenten ihrer Anwendung beim System registrieren.
+
+Für das Options Menu können alle Menueinträge im XML definiert und später im
+Java geladen werden.
+
+Android bietet Adapter an, die unterliegende Daten auf GUI Elemente, wie Views
+mappen
+
+Um Zugriff auf Daten in einem Content Provider zu erhalten, kann es sein, dass
+eine Referenz auf den Context benötigt wird.
+
+Android Applikationen sind aus lose gebundenen Komponenten
+aufgebaut welche über Intents interagieren
+
+Alle Komponenten einer Android Applikation müssen im Android
+Manifest registriert werden
+
+Die Architektur von Android besteht aus einem Hardware
+Adaption Layer, Core Libraries, welche in C/C++ geschrieben
+sind, der Dalvik Virtual Machine, den Java Libraries, dem
+Application Framework und den Applikationen
+
+Es wird empfohlen Layouts und User-Interface Elemente in XML
+zu deklarieren und dann diese Layouts und Interface Elemente
+zur Laufzeit zu benutzen
+
+Mit XML definierte Menus können mittels eines Adapters an eine
+View gebunden werden
+
+Android unterstützt das Einfügen von dynamisch erzeugten Views
+und ViewGroups
+
+Eine Managed Query an einen Content Provider führt dazu dass
+Android den Cursor managt
+
+Die Speicherung von Daten mittels SharedPreferences
+funktioniert nur mit primitiven Datentypen wie Boolean, Float, Int,
+Long, String
+
+Die gemeinsame Nutzung von Daten in verschiedenen
+Applikationen erfolgt in Android über Content Provider
+
+\subsubsection{Falsch}
+Auf den meisten Android Phones läuft die neueste Version von Android (Stand: 1.
+Juli 2012)
+
+Die schnellste Möglichkeit auf Android Ressourcen wie Bilder und Strings lesend
+zuzugeifen ist per Direct Access
+
+In Android können Layouts nur in XML deklariert werden
+
+Android Apps dürfen auf die Geo-Location des Phones zugreifen, ohne dass der
+User zustimmen muss.
+
+Die Namen von SQLite Datenbank-Dateien müssen auf einem Androidgerät äber a1le
+Applikationen hinwes eindeutig sein.
+
+In Shared Preferences können alle möglichen Datentypen gespeichert werden.
+
+Implizite Intents werden typischerweise flir Applikations-interne Messages
+eingesetzt, wie z.B. von einer Activity um eine Unteractivity zu starten.
+
+Android Applikationen können auf einem Geräte gedebuggt werden, ohne vorher
+signiert worden zu sein.
+
+Auf Android Ressourc en kann mittels Direct Access immer am
+schnellsten zugegriffen werden
+
+Strings, Dimension Values, Colors, Styles, und Layouts können in
+Android nur in Ressourcen abgelegt werden
+
+Android stellt für Datenbankmanipulationen explizite Commit und
+Rollback Kommandos zur Verfügung
+
+Content Provider werden über eine Internetadresse
+angesprochen
+
+Explizite Intents beschreiben im Wesentlichen eine Aufgabe, die
+ausgeführt werden soll. Solche Intents spezifieren Action,
+Category, Data und Extras und überlassen es dem System, die
+am besten geeignete Komponente zur Ausführung dieser
+Aufgabe zu finden
+
+\subsection{Typische Fragen}
+(XML Layout und ein paar Attribute fehlen) Welche Attribute müssen an der
+Stelle (1) minimal zu dieser Konfiguration hinzugefügt wer- den, damit das
+Layout wie abgebildet auf einem Android-Phone dargestellt werden kann?
+
+\begin{lstlisting}
+android:layout\_width="fill\_parent"
+android:layout\_height="wrap\_content"
+android:orientation="vertical"
+\end{lstlisting}
+
+Aus welchem Grund wird dieser Text mittels einer Ressource konfigurierbar
+gehalten?
+\begin{lstlisting}
+Having the string configurable we can support multiple languages
+\end{lstlisting}
+
+Welche Anweisung kann in Java verwendet werden, um eine Instanz des Buttons zu
+erzeugen, welche auf der in XML deklarierten Layout Konfiguration basiert.
+\begin{lstlisting}
+Button surveyPauseButton = (Button) findViewById(R.id.bu_survey_pause);
+\end{lstlisting}
