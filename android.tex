@@ -678,8 +678,6 @@ actions. Buttons should not take more than 50\% of width. Not too many icons.
 $onCreate$. Android calls $onCreateOptionsMenu$ in the fragment.
 
 \subsection{Richtig oder Falsch?}
-\includegraphics[width=0.15\textwidth]{android/bskon_1.png}
-
 \subsubsection{Komplett Richtig}
 Android ist ein Software Stack fuer mobile Geräte, der u.a. ein Betriebsystem,
 Middleware und wichtige Anwendungen bereit stellt
@@ -727,6 +725,28 @@ Long, String
 Die gemeinsame Nutzung von Daten in verschiedenen
 Applikationen erfolgt in Android über Content Provider
 
+Anwendungskomponenten und zugehörige Intentfilter, sowie eine White-List mit
+dem Permissions einer Applikation müssen im Android Manifest deklariert werden.
+
+Views, die in einem XML Layout enthalten sind, können zur Identifikation bei
+Aufrufen mit einer ID versehen werden.
+
+Eine Adapter Objekt kann als Bridge zwischen einer View und den der View
+unterliegenden Daten fungieren.
+
+Die Android Debug Bridge adb kann benutzt werden um auf die SQLite Datenbanken
+eines Androidgeräts zuzugreifen.
+
+Edits auf eine Shared Preference, welche nicht comitted wurden, sind nicht
+persistent über Sessions hinweg.
+
+Ein impliziter Intent ist eine abstrakte Beschreibung einer Operation, die
+ausgeführt werden soll.
+
+Logs aus verschiedenen Anwendungen unda us Teilen des Systems werden in einer
+Serie von Ringpuffern gesammelt und können mit dem logcat Tool gefiltert und
+angesehen werden.
+
 \subsubsection{Falsch}
 Auf den meisten Android Phones läuft die neueste Version von Android (Stand: 1.
 Juli 2012)
@@ -767,6 +787,17 @@ ausgeführt werden soll. Solche Intents spezifieren Action,
 Category, Data und Extras und überlassen es dem System, die
 am besten geeignete Komponente zur Ausführung dieser
 Aufgabe zu finden
+
+Der Android Software Stack besteht auf Hardware Adapation Layer, Core libraries
+welche in Java geschrieben sind, eine JVM, ein Application Framework und
+Anwendungen.
+
+Explizite Intents ermöglichen eine lose Kopplung von Anwendungen.
+
+Android Anwendungen können die GPS Location immer ohne Zustimmung des Benutzers
+brauchen, wenn diese auf dem Gerät zur Verfügung gestellt werden kann
+
+Alle Intent Filter müssen in XML deklariert werden.
 
 \subsection{Typische Fragen}
 (XML Layout und ein paar Attribute fehlen) Welche Attribute müssen an der
