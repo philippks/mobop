@@ -677,6 +677,74 @@ actions. Buttons should not take more than 50\% of width. Not too many icons.
 \textbf{Fragments} may contribute actions buttons with $hasOptionsMenu$ in
 $onCreate$. Android calls $onCreateOptionsMenu$ in the fragment.
 
+\subsection{MVC -  Model-View-Controller}
+Model = represents app's data, notifies the controller about changes in the data, takes care of things like persistence, model objects and networking. View(UIView) = represents the face of the app, notifies the controller about user-actions, reusable classes without domain-specific logic. Controller(UIKit-dependent) = mediates between model and view, implements domain-specific logic, updates model and view. Problems = Tight coupling between View and ViewController, Controller is hard to test because of UIKit dependency, MVC == Massive View Controller = Delegate / DataSource methods, Target-Action methods, ViewController Lifecycle methods, Layout code, Formatting of data (transforming data object into strings), providing default values for missing data (placeholder images)
+\includegraphics[width=0.15\textwidth]{mvc.png}
+\textbf{Model}
+Represents the app's data,
+Notifies the controller about changes in the data,
+Takes care of things like persistence, model objects and networking.
+
+\textbf{View (UIView)}
+Represents the face of the app,
+Notifies the controller about user-actions,
+Reusable classes without domain-specific logic.
+
+\textbf{Controller (UIKit-dependent)}
+Mediates between Model and View,
+Implements domain-specific logic,
+Updates Model and View
+
+\textbf{Problems}
+Tight Coupling between View and View Controller,
+Controller is hard to test because of UIKit dependency,
+MVC == Massive View Controller (Delegate / DataSource methods, Target-Action
+methods, ViewController Lifecycle methods, Layout-Code, Formatting of data)
+
+\subsection{MVP - Model-View-Presenter}
+Model = represents app's data, notifies the controller about changes in the data, takes care of things like persistence, model objects and networking. View (UIView + UIViewController) = Represents the face of the app, Notifies the presenter about user-actions, \textbf{knows the presenter}. Presenter(UIKit-independent) = mediates between model and view, implements domain-specific logic, updates model and view, \textbf{Loosely coupled to View via protocol}.
+\includegraphics[width=0.15\textwidth]{mvp.png}
+\textbf{Model} (same as in MVC)
+
+\textbf{View (UIView + UIViewController)}
+Represents the face of the app,
+Notifies the presenter about user-actions,
+Knows the presenter
+
+\textbf{Presentor (UIKit-independent)}
+Mediates between Model and View,
+Implements domain-specific logic,
+Updates Model and View,
+Loosely coupled to View via protocol
+
+\subsection{MVVM - Model-View-ViewModel}
+Modle = represents the app's data, notifies the controller about changes in the data, takes care of things like persistence, model objects and networking. View (UIView + UIViewController) = represents the face of the app, \textbf{notifies ViewModel about user-actions and observes properties of ViewModel, Knows the ViewModel}. ViewModel(UIKit-independent) = mediates between Model and View, Implements domain-specific logic, updates model and view (indirectly via bindings), \textbf{loosely coupled to view via bindings / Observer-pattern}.
+\includegraphics[width=0.15\textwidth]{mvvm.png}
+
+\textbf{Model} (same as in MVC)
+
+\textbf{View (UIView + UIViewController)}
+face of the app,
+Notifies ViewModel about user-actions and observes properties of ViewModel
+Knows the ViewModel
+
+\textbf{ViewModel (UIKit-independent)}
+Mediates between Model and View,
+Implements domain-specific logic,
+Updates Model and View (indirectly via Bindings),
+Loosely coupled to View via Bindings / Observer-Pattern
+
+
+\subsection{Target-Action Pattern}
+he target is an object that implements the action method
+The action is a selector (basically a glorified string) that describes the name /
+signature of that method
+The button stores the target-action pairs
+When the button is pressed, it looks for all the target-action pairs for the
+touchUpInside Event and sends the corresponding action-selector to each target.
+method dispatch happens dynamically requires Objective-C runtime
+target object must be subclass of NSObject
+
 \subsection{Richtig oder Falsch?}
 \subsubsection{Komplett Richtig}
 Android ist ein Software Stack fuer mobile Geräte, der u.a. ein Betriebsystem,

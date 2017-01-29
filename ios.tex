@@ -1,81 +1,5 @@
 \section{Swift and IOS}
 
-\subsection{Arrays}
-have to be same type, value semantics, empty array [], [Int] = Array<Int>
-\begin{lstlisting}
-let ints1 = [1, 2, 3, 4, 5] //Array<Int>
-var ints2 = ints1 // mutable copy
-ints2.append(6) // here copy
-print(ints1)
-let strs = Array(repeating: "Hi", count: 10)
-for s in strs { ... }
-for (i, s) in strs.enumerated() { ... }
-ints2[0...<3] = [0, 0]
-ints2[0...4] = []
-\end{lstlisting}
-
-\subsection{Sets}
-Elements needs to conform Hashable protocol. Value semantics.
-\begin{lstlisting}
-var letters: Set<Character> = []
-for c in "it is a test".characters {
-   letters.insert(c) }
-if letters.contains(" ") { // compiler knows its char not str
-   print(letters.count) }
-\end{lstlisting}
-
-\subsection{Dictionaries}
-keys need to conform to Hashable protocol. value semantics, empty dictionary [:]
-[TypeK:TypeV] = Dictionary<TypeK, TypeV>
-\begin{lstlisting}
-let population = ["Switzerland" : 8_000_000,
-                       "Germany" : 80_000_000]
-for (country, count) in population {
-   print("\(country): \(count) people") }
-print(population["Germany"])
-print(population["Italy"]) // nil
-population["France"] = 66_000_000 //new
-for k in population.keys { }
-for v in population.values { }
-\end{lstlisting}
-
-\subsection{Tuples}
-Tuples, function types, any, anyobjects cant be extended !
-multiple values into single compound value, can have different types, no single-element tuples Type(Int) = type int. Expression ("hello") = type String not (String). Empty tuple () is a valid type. Has a single value, same as Void
-\begin{lstlisting}
-let john = (33, "John") // (Int, String)
-print("\(john,1) is \(john.0).")
-let dora1 = (age: 26, name: "Dora1")
-var dora2 = dora1
-dora2.name = "Dora2"
-dora2.age += 1
-print(\(dora2.name) is \(dora2.age))
-\end{lstlisting}
-
-\subsection{Function Types ** buggy}
-\begin{lstlisting}
-func f1() {}  // (()) -> () **
-func f2(_x: Int) -> Int { return x } // (Int) -> Int
-func f3(_x: Int, _y: Int) {} // ((Int, Int)) -> () **
-func f4(_x: (Int, Int)) {} // ((Int, Int)) -> Int
-\end{lstlisting}
-
-
-\subsection{Any vs AnyObject}
-any: existential type without requirements, build into compiler, all types are implicit subtypes of it
-\begin{lstlisting}
-func f(_x: Any) {}
-class C {}
-let c = C()
-f(c)
-f(2)
-f((0.5, "test"))
-f([true, false, true])
-f(f)
-\end{lstlisting}
-They all work. If AnyObject instead of Any it has to be a class. Only f(c) works. (class requirement)
-Never: uninhabited type in stl (doesnt have any value) public enum Never{}, means that function can not return, examples fatalError() exit(), they can be used in else-clause of guard statement.
-
 \subsection{Type Inference}
 uses bi-directional type inference (not like C++, Java, Objective C), scope limited to single statement
 let x, x = 10 is not possible! (has to be x:Int). Sometimes doesnt work as expected or takes a bit longer to compile.
@@ -148,8 +72,7 @@ switch peopleCount {
 \subsection{For-In Statement}
 \begin{lstlisting}
 let numbers = [4, 8, 15, 16, 23, 42]
-for n in numbers {
-   print(n) }
+for n in numbers { print(n) }
 for (i,n) in numbers.enumerated(){ //tuple
    print("numbers[\(i))] = \(n)") }
 for n in numbers where n % 2 == 0 {
@@ -168,8 +91,7 @@ repeat{
    if let pw = readLine() {
       if pw == "secret" {
          break  // successful }
-   } else {
-      break }
+   } else { break }
 } while true
 \end{lstlisting}
 
@@ -268,30 +190,24 @@ func makeMultiplier(factor: Int) -> (Int) -> Int {
 	   return factor * n }
 	return multiplier }
 let multiplyByThree = makeMultiplier(factor: 3)
-print(numbers.map(multiplyByThree))
 \end{lstlisting}
 
 \subsection{Generic Functions}
 \begin{lstlisting}
-func _min<T: Comparable> (_ x: T, _ y: T) -> T {
-   return y < x ? y : x }
-func sum<T: Sequence>(_ numbers: T) -> Int where T.iterator.Element == Int {
-   return numbers.reduce(0,+) }
+func _min<T: Comparable> (_ x: T, _ y: T) -> T { return y < x ? y : x }
+func sum<T: Sequence>(_ numbers: T) -> Int where T.iterator.Element == Int { return numbers.reduce(0,+) }
 \end{lstlisting}
 
 \subsection{Inout Parameter}
 when the function is called, the value of the argument is copied. in the body of the function the copy is modified, when the function returns the copy's value is assigned to the original argument.
 \begin{lstlisting}
-func _swap<T>(_ x: inout T, _y: inout T) {
-   (x,y) = (y,x) }
+func _swap<T>(_ x: inout T, _y: inout T) { (x,y) = (y,x) }
 _swap(&i1, &i2)
 \end{lstlisting}
 
 \subsection{print}
-\begin{lstlisting}
-func print(_ items: Any..., separator: String = " ", terminator: String = "\n")
-//variadic parameter, because the parameter separator and terminator have an external name we can omit eithr one or both of them.
-\end{lstlisting}
+func print(\_ items: Any..., separator: String = " ", terminator: String = "\\n")
+//variadic parameter, because the parameter separator and terminator have an external name we can omit either one or both of them
 
 \subsection{Closures (anonymous functions)}
 \begin{lstlisting}
@@ -325,6 +241,10 @@ p2 = p1
 \end{lstlisting}
 
 \subsection{Initializers}
+init() { self.name = "<unknown>" }
+init?(name: String) { // failable initializer
+	guard !name.isEmpty else { return nil }
+	self.name = name; }
 \begin{lstlisting}
 init() { self.name = "<unknown>" }
 init?(name: String) { // failable initializer
@@ -352,7 +272,6 @@ switch a { case is Cat: ...}
 \subsection{Subscript}
 \begin{lstlisting}
 class Matrix {
-   ...
    var grid: [Double]
    init(rows: Int, cols: Int) {
       self.rows = rows
@@ -375,8 +294,7 @@ class ClassA {
    //weak var b: ClassB? // must be class type, optional, variable not left-constant, is nill when deallocated, no increment!
    deinit {print("ClassB")} }
 class ClassB {
-   var a: ClassA?
-   //weak var a: ClassA?
+   var a: ClassA? //weak var a: ClassA?
    deinit {print("ClassA")} }
 func f() {
    let a = ClassA(), b = ClassB()
@@ -385,12 +303,7 @@ func f() {
 \end{lstlisting}
 
 \subsection{Access Control}
-TODO TODO TODO TODO
-TODO TODO TODO TODO
-TODO TODO TODO TODO
-TODO TODO TODO TODO
-TODO TODO TODO TODO
-TODO TODO TODO TODO
+private = declaration scope (Access,subclass), fileprivate = File (Access,subclass,override), internal = module (access,subclass, override), public = other modules (access), open = other modules (subclass,override)
 
 \subsection{structs}
 value types, dont support inheritance, can adopt 0 or more protocols, can be generic, initializers but no deinitializers. Int, Double,. Bool, String, Array<T> are implemented with structs.
@@ -433,7 +346,6 @@ for _ in 0..<10 { // only 1. it deep copy
 public enum Optional<Wrapped> {
    case none
    case some(Wrapped) }
----
 import Foundation
 enum Result<T> {
    case success(T)
@@ -448,8 +360,7 @@ switch result {
    case .success(let html):
       print(html)
    case .error(let message):
-      print(message)
-}
+      print(message) }
 \end{lstlisting}
 
 \subsection{Operators}
@@ -542,7 +453,6 @@ extenstion Int {
          action() } } }
 5000.times {
    print("Please hold the line.") }
----
 extension Sequence where Iterator.Element == Int {
    func average() -> Double {
       var sum = 0, count = 0
@@ -558,7 +468,7 @@ print(range.average())
 classes have many drawbacks: implicit sharing because of reference semantics, inheritance leads to high coupling between related classes. benefits of protocol oriented programming: works with value types (structs, enums) and ref types. less coupling, static type relationship. first step for a new abstraction should always be a protocol.
 \begin{lstlisting}
 protocol Human {
-var firse: String { get }
+var first: String { get }
 var last: String { get }
 var age: Int { get } }
 extension Human {
@@ -605,15 +515,8 @@ can not be called for instances of this struct that are declared with let. Same 
 \begin{lstlisting}
 struct Counter {
 private(set) var count: Int
-
 mutating func inc() {
 count += 1 } }
-
-var counter = Counter(count: 0)
-print(counter.count)
-counter.inc()
-counter.inc()
-print(counter.count)
 \end{lstlisting}
 
 \subsection{AutoClosure}
@@ -621,12 +524,8 @@ We expect that the logical conjunction operator has the same short-circuiting be
 infix operator \&\&\&: LogicalConjunctionPrecedence
 \begin{lstlisting}
 func &&&(lhs: Bool, rhs: @autoclosure () -> Bool) -> Bool {
-if lhs {
-return rhs() }
-return false }
-func f() -> Bool {
-print("f() is called")
-return true }
+if lhs { return rhs() } return false }
+func f() -> Bool { print("f() is called") return true }
 print(true &&& f())     // f() is called; result is true
 print(false &&& f())	// f() is not called; result is false
 \end{lstlisting}
@@ -659,6 +558,7 @@ func play() { print("play something")} }
 \end{lstlisting}
 
 \subsection{Preparing a segue}
+During a segue, a new instance of the destination view controller class is created. often we need to pass data from the origin view controller to it. 1) give each segue an identifier. 2) Override prepare (for: sender:)method in origin view controller.
 \begin{lstlisting}
 override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 switch segue.identifier! {
@@ -670,15 +570,11 @@ case "ShowEpisodes":
 let tvc = segue.destination as! EpisodeViewController
 guard let indexPath = tableView.indexPathForSelectedRow else {return}
 tvc.show = fetchedResultsController.object(at: indexPath)
-default:
-fatalError() } }
+default: fatalError() } }
 \end{lstlisting}
 
-
-\subsection{TODO EXAMPLE FOR UI (AUTOLAYOUT)-> FROM EXERCISES (IT WILL BE IN THE EXAM)}
-
-
 \subsection{Common Views and Controls}
+visible, rectangular regions on screen, view draw content in their own rect area. can have multiple subvies and a single supervies. receive touch events. Origin top left corner. each view own coordinate sys. relative to their superviews system. to access the y position of a view, you would write view.frame.origin.y
 \begin{lstlisting}
 override func viewDidLoad() {
 super.viewDidLoad()
@@ -704,7 +600,8 @@ if let text = sender.text { print(test) } }
 
 \subsection{Outlet and Actions}
 \begin{lstlisting}
-import UIKit
+import UIKit // Outlet is an instance variable through which the view controller code can refer to
+the label / button / ..
 class ViewController: UIViewController {
 @IBOutlet weak var nameLabel: UILabel!
 override func viewDidLoad() {
@@ -719,7 +616,7 @@ nameLabel.text = "Tom"} }
 //example 1 without sections
 class ViewController: UITableViewController {
 let months = ["January", "February" ...]
-override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
+override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int)-> Int{
 return months.count}
 override func tableView(_ tableView: UITableView, cellForRowAt indexPath: indexPath) -> UITableViewCell {
 let cell = tableView.dequeueReusableCell(withIdentifier: "CellIdentifier", for: indexPath)
@@ -728,8 +625,8 @@ cell.accessoryType = .disclosureIndicator
 return cell }
 override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 tableView.deselectRow(at: indexPath, animated: true)
-print("selected"\(months[indexPath.row])")} }
-//example 2 with sections class not written again
+print("selected"\(months[indexPath.row])")} } 
+// example 2 with sections class not written again
 let seasons = [Season(name: "Spring", months: ["Mar","Apr","May"]),...]
 override func numberOfSections(in tableView: UITableView) -> Int { return seasons.count}
 override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -743,26 +640,26 @@ return cell}
 \end{lstlisting}
 
 \subsection{MVC}
-\textbf{Model}
-Represents the app's data,
-Notifies the controller about changes in the data,
-Takes care of things like persistence, model objects and networking.
-
-\textbf{View (UIView)}
-Represents the face of the app,
-Notifies the controller about user-actions,
-Reusable classes without domain-specific logic.
-
-\textbf{Controller (UIKit-dependent)}
-Mediates between Model and View,
-Implements domain-specific logic,
-Updates Model and View
-
-\textbf{Problems}
-Tight Coupling between View and View Controller,
-Controller is hard to test because of UIKit dependency,
-MVC == Massive View Controller (Delegate / DataSource methods, Target-Action
-methods, ViewController Lifecycle methods, Layout-Code, Formatting of data)
+%\textbf{Model}
+%Represents the app's data,
+%Notifies the controller about changes in the data,
+%Takes care of things like persistence, model objects and networking.
+%
+%\textbf{View (UIView)}
+%Represents the face of the app,
+%Notifies the controller about user-actions,
+%Reusable classes without domain-specific logic.
+%
+%\textbf{Controller (UIKit-dependent)}
+%Mediates between Model and View,
+%Implements domain-specific logic,
+%Updates Model and View
+%
+%\textbf{Problems}
+%Tight Coupling between View and View Controller,
+%Controller is hard to test because of UIKit dependency,
+%MVC == Massive View Controller (Delegate / DataSource methods, Target-Action
+%methods, ViewController Lifecycle methods, Layout-Code, Formatting of data)
 
 \begin{lstlisting}
 class GreetingViewController: UIViewController {
@@ -772,22 +669,22 @@ override func viewDidLoad() {
 super.viewDidLoad()
 greetingLabel.text = "Tap the button" }
 @IBAction func didTapButton(_ sender: Any) {
-greetingLabel.text = "Hello " + person.firstName} }
+greetingLabel.text = "Hello " + person.firstName}}
 \end{lstlisting}
 
 \subsection{MVP}
-\textbf{Model} (same as in MVC)
-
-\textbf{View (UIView + UIViewController)}
-Represents the face of the app,
-Notifies the presenter about user-actions,
-Knows the presenter
-
-\textbf{Presentor (UIKit-independent)}
-Mediates between Model and View,
-Implements domain-specific logic,
-Updates Model and View,
-Loosely coupled to View via protocol
+%\textbf{Model} (same as in MVC)
+%
+%\textbf{View (UIView + UIViewController)}
+%Represents the face of the app,
+%Notifies the presenter about user-actions,
+%Knows the presenter
+%
+%\textbf{Presentor (UIKit-independent)}
+%Mediates between Model and View,
+%Implements domain-specific logic,
+%Updates Model and View,
+%Loosely coupled to View via protocol
 
 \begin{lstlisting}
 protocol GreetingView: class {
@@ -800,7 +697,6 @@ super.viewDidLoad()
 presenter.initializeUI() }
 @IBAction func didTapButton(_ sender: Any) { presenter.showGreeting() }
 func setGreeting(_ greeting: String) { greetingLabel.text = greeting } }
-
 class GreetingPresenter {
 weak var view: GreetingView?
 let person: Person
@@ -812,7 +708,6 @@ view?.setGreeting("Tap the button") }
 func showGreeting() {
 let greeting = "Hello" + " " + person.firstName + " " + person.lastName
 view?.setGreeting(greeting) } }
-
 class GreetingMVPTests: XCTestCase {
 class MockGreetingView: GreetingView {
 var greeting: String!
@@ -823,23 +718,22 @@ let view = MockGreetingView()
 let presenter = GreetingPresenter(view: view,
 person: Person(firstName:"First", lastName:"Last"))
 presenter.showGreeting()
-XCTAssertEqual("Hello First Last", view.greeting) }
-// more tests... }
+XCTAssertEqual("Hello First Last", view.greeting) } }
 \end{lstlisting}
 
 \subsection{MVVM}
-\textbf{Model} (same as in MVC)
-
-\textbf{View (UIView + UIViewController)}
-face of the app,
-Notifies ViewModel about user-actions and observes properties of ViewModel
-Knows the ViewModel
-
-\textbf{ViewModel (UIKit-independent)}
-Mediates between Model and View,
-Implements domain-specific logic,
-Updates Model and View (indirectly via Bindings),
-Loosely coupled to View via Bindings / Observer-Pattern
+%\textbf{Model} (same as in MVC)
+%
+%\textbf{View (UIView + UIViewController)}
+%face of the app,
+%Notifies ViewModel about user-actions and observes properties of ViewModel
+%Knows the ViewModel
+%
+%\textbf{ViewModel (UIKit-independent)}
+%Mediates between Model and View,
+%Implements domain-specific logic,
+%Updates Model and View (indirectly via Bindings),
+%Loosely coupled to View via Bindings / Observer-Pattern
 
 \begin{lstlisting}
 import RxSwift
@@ -852,10 +746,7 @@ func initializeUI() {
 greetingText.value = "Tap the button" }
 func showGreeting() {
 greetingText.value = "Hello " + person.firstName + " " + person.lastName } }
-
-import UIKit
-import RxSwift
-import RxCocoa
+import UIKit; import RxSwift; import RxCocoa
 class GreetingViewController: UIViewController {
 var vm: GreetingViewModel!
 let disposeBag = DisposeBag() // removes observer when view controller is deinitialized
@@ -867,7 +758,6 @@ vm.initializeUI()
 button.addTarget(vm, action: #selector(vm.showGreeting), for: .touchUpInside)
 vm.greetingText.asObservable().bindTo(greetingLabel.rx.text)
 .addDisposableTo(disposeBag) } }
-
 class GreetingMVVMTests: XCTestCase {
 func testInitializeUI() {
 let vm = GreetingViewModel(person: Person(firstName: "First", lastName: "Last"))
@@ -879,14 +769,183 @@ vm.showGreeting()
 XCTAssertEqual("Hello First Last", vm.greetingText.value)} }
 \end{lstlisting}
 
+\subsection{HTTP GET}
+\begin{lstlisting}
+import Foundation
+enum Result<T>{
+  case success(T)
+  case error(String) }
+final class APIClient {
+  let baseURL = URL(string: "http://api.tvmaze.com)!
+  let sessoin: URLSession
+  init() {
+    let configuration = URLSessionConfiguration.default
+    configuration.httpAdditionalHeaders = ["Accept: "application/json"]
+    session = URLSession(configuration: configuration)} }
+extension APIClient {
+func searchShows(_ term: String, callback: @escaping (Result<[Show]>) -> Void) {
+guard let term = term.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+callback(.error("Invalid Search Term"))
+return }
+let url = URL(string: "search/shows?q=\(term)", relativeTo: baseURL)!
+let task = session.dataTask(with: url, completionHandler: { (data, response, error) in
+let result = self.getResult(data: data, response: response, error: error)
+OperationQueue.main.addOperation {
+callback(result) } })
+task.resume() } }
+extension APIClient {
+func getResult(data: Data?, response: URLResponse?, error: Error?) -> Result<[Show]> {
+guard error == nil else { return .error(error!.localizedDescription) }
+guard let response = response as? HTTPURLResponse,
+200..<300 ~= response.statusCode,
+let data = data else {
+return .error("Server Error") }
+guard let json = try? JSONSerialization.jsonObject(with: data),
+let result = self.parseShows(json) else {
+return .error("Failed to parse JSON") }
+return .success(result) } }
+struct Show {
+let id: Int, name: String
+init?(json: [String: Any]) {
+guard let showDict = json["show"] as? [String: Any],
+let id = showDict["id"] as? Int,
+let name = showDict["name"] as? String else { return nil }
+self.id = id
+self.name = name } }
+extension APIClient {
+func parseShows(_ json: Any) -> [Show]? {
+guard let arrayOfJsonDicts = json as? [[String: Any]] else { return nil }
+return arrayOfJsonDicts.flatMap { Show(json: $0) } }
+import UIKit
+class ViewController: UIViewController {
+override func viewDidLoad() {
+super.viewDidLoad()
+let client = APIClient()
+client.searchShows("Homeland") { result in
+switch result {
+case .success(let shows):
+shows.forEach { print($0.id, $0.name) }
+case .error(let message):
+print(message) } } }
+\end{lstlisting}
 
+\subsection{HTTP POST}
+\begin{lstlisting}
+extension APIClient {
+func addShow() {
+let show = ["name": "The Big Bang Theory"]
+guard let data = try? JSONSerialization.data(withJSONObject: show) else {
+fatalError() }
+let url = URL(string: "shows", relativeTo: baseURL)!
+var request = URLRequest(url: url)
+request.httpMethod = "POST"
+request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+request.httpBody = data
+let task = session.dataTask(with: request, completionHandler: { (data, response, error) in // handle response })
+task.resume()
+\end{lstlisting}
+
+\subsection{Core Data}
+Persistence Framework for iOS / macOS. Core Data is a framework that you use to manage the model layer objects in your application.
+(Managed Object Context (Managed Object, Managed Object)) $\leftrightarrow$ (Persistent Store Coordinator (Persistent Store)) $\leftrightarrow$ (SQLite)
+\begin{lstlisting}
+import Foundation; import CoreData
+class Item: NSManagedObject {
+// additional methods / computed properties }
+extension Item {
+@nonobjc class func fetchRequest() -> NSFetchRequest<Item> {
+return NSFetchRequest<Item>(entityName: "Item") }
+@NSManaged var text: String
+@NSManaged var done: Bool
+@NSManaged var created: Date }
+\end{lstlisting}
+CoreDataStack = Helper class that sets up Core Data Stack. Can be passed around between view controller classes. Provides access to the managed object context.
+\begin{lstlisting}
+import CoreData
+final class CoreDataStack {
+lazy var persistentContainer: NSPersistentContainer = {
+let container = NSPersistentContainer(name: "ToDo")
+container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+if let error = error {
+fatalError(error.localizedDescription) } })
+return container }()
+var context: NSManagedObjectContext { return persistentContainer.viewContext }
+func saveContext () {
+if context.hasChanges { try! context.save() } } }
+\end{lstlisting}
+Create Edit Delete a managed object
+\begin{lstlisting}
+func createItem(text: String) {
+let item = Item(context: coreDataStack.context)
+item.created = Date()
+item.text = text
+item.done = false
+coreDataStack.saveContext() }
+func toggleItem(_ item: Item) {
+item.done = !item.done
+coreDataStack.saveContext() }
+func deleteItem(_ item: Item) {
+coreDataStack.context.delete(item)
+coreDataStack.saveContext() }
+\end{lstlisting}
+
+\subsection{Fetch Requests}
+Describes which data to fetch from persistent store. Set predicate to filter. Use Sort Descriptors.
+\begin{lstlisting}
+func fetchItems() -> [Item]? {
+let fetchRequest: NSFetchRequest<Item> = Item.fetchRequest()
+fetchRequest.sortDescriptors = [NSSortDescriptor(key: "created", ascending: false)]
+return try? coreDataStack.context.fetch(fetchRequest) }
+\end{lstlisting}
+Fetched Results Controller = Efficiently manages the results returned from a core data fetch request to provide data for a UITableView object. Notifies its delegate about changes in the data $\rightarrow$ use FetchedResultsController delegate methods to update table view to reflect changes.
+\begin{lstlisting}
+class ItemsTableViewController: UITableViewController {
+var stack: CoreDataStack!
+var fetchedResultsController: NSFetchedResultsController<Item>!
+override func viewDidLoad() {
+super.viewDidLoad()
+let fetchRequest: NSFetchRequest<Item> = Item.fetchRequest()
+fetchRequest.sortDescriptors = [NSSortDescriptor(key: "created", ascending: false)]
+fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
+managedObjectContext: stack.context,
+sectionNameKeyPath: nil,
+cacheName: nil)
+fetchedResultsController.delegate = self
+try! fetchedResultsController.performFetch()
+extension ItemsTableViewController {
+override func numberOfSections(in tableView: UITableView) -> Int {
+return fetchedResultsController.sections?.count ?? 0 }
+override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+return fetchedResultsController.sections?[section].numberOfObjects ?? 0 }
+override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+let cell = tableView.dequeueReusableCell(withIdentifier: "ItemCell", for: indexPath)
+let item = fetchedResultsController.object(at: indexPath)
+cell.textLabel?.text = item.text
+cell.accessoryType = item.done ? .checkmark : .none
+return cell }
+extension ItemsTableViewController: NSFetchedResultsControllerDelegate {
+func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+tableView.beginUpdates() }
+func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any,
+at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+switch type {
+case .insert:
+if let newIndexPath = newIndexPath { tableView.insertRows(at: [newIndexPath], with: .automatic) }
+case .delete:
+if let indexPath = indexPath { tableView.deleteRows(at: [indexPath], with: .automatic) }
+case .update:
+if let indexPath = indexPath { tableView.reloadRows(at: [indexPath], with: .automatic) }
+case .move:
+if let old = indexPath, let new = newIndexPath { tableView.moveRow(at: old, to: new) } } }
+func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+tableView.endUpdates() } }
+\end{lstlisting}
 
 %\subsection{TODO}
 %\begin{lstlisting}
 %\\AppDelegate.swift
 %import UIKit
 %import CoreData
-%
 %@UIApplicationMain
 %class AppDelegate: UIResponder, UIApplicationDelegate {
 %let coreDataStack = CoreDataStack()
@@ -1237,220 +1296,143 @@ XCTAssertEqual("Hello First Last", vm.greetingText.value)} }
 
 \subsection{Contacts}
 \begin{lstlisting}
-//AppDelegate.swift
-import UIKit
-
+import UIKit //AppDelegate.swift
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-var window: UIWindow?
-}
-//PeopleViewController.swift
-import UIKit
-
+var window: UIWindow?}
+import UIKit //PeopleViewController.swift
 class PeopleViewController: UITableViewController {
 let people = [Person(name: "Anna", birthday: "01.05.1955", phone: "012 345 67 89", email: "anna@example.com"),
 Person(name: "Jenny", birthday: "17.09.2001", phone: "012 345 67 89", email: "jenny@example.com"),
 Person(name: "Walter", birthday: "24.12.1969", phone: "012 345 67 89", email: "walter@example.com")]
-
 override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-return people.count
-}
-
+return people.count }
 override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 let cell = tableView.dequeueReusableCell(withIdentifier: "ContactCell", for: indexPath)
 let person = people[indexPath.row]
 cell.textLabel?.text = person.name
 cell.accessoryType = .disclosureIndicator
-return cell
-}
-
+return cell }
 override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 switch segue.identifier! {
 case "ShowPerson":
 let personViewController = segue.destination as! PersonViewController
 personViewController.person = people[tableView.indexPathForSelectedRow!.row]
 default:
-fatalError()
-}
-}
-}
-//Person.swift
-import Foundation
-
+fatalError() } } }
+import Foundation //Person.swift
 struct Person {
 let name: String
 let birthday: String
 let phone: String
-let email: String
-}
-//PersonViewController
-import UIKit
-
+let email: String }
+import UIKit //PersonViewController
 class PersonViewController: UIViewController {
 var person: Person!
-
 @IBOutlet weak var nameLabel: UILabel!
 @IBOutlet weak var birthdayLabel: UILabel!
 @IBOutlet weak var phoneLabel: UILabel!
 @IBOutlet weak var emailLabel: UILabel!
-
 override func viewDidLoad() {
 super.viewDidLoad()
-
 title = person.name
 nameLabel.text = person.name
 birthdayLabel.text = person.birthday
 phoneLabel.text = person.phone
-emailLabel.text = person.email
-}
-}
+emailLabel.text = person.email } }
 \end{lstlisting}
 
 \subsection{REST Countries}
 \begin{lstlisting}
-//APPDelegate.swift
-import UIKit
-
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
-var window: UIWindow?
-}
-//APIClient.swift
-import Foundation
-
+import Foundation //APIClient.swift
 enum Result<T> {
 case success(T)
-case error(String)
-}
-
+case error(String) }
 final class APIClient {
 let session: URLSession
-
 init() {
 let configuration = URLSessionConfiguration.default
 configuration.httpAdditionalHeaders = ["Accept": "application/json"]
 configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
-session = URLSession(configuration: configuration)
-}
-
+session = URLSession(configuration: configuration) }
 func getCountries(callback: @escaping (Result<[Country]>) -> Void) {
 let url = URL(string: "https://restcountries.eu/rest/v1/all")!
 session.dataTask(with: url) { (data, response, error) in
 let result = self.getResult(data: data, response: response, error: error)
-
 OperationQueue.main.addOperation {
-callback(result)
-}
-}.resume()
-}
-
+callback(result) } }.resume() }
 func getResult(data: Data?, response: URLResponse?, error: Error?) -> Result<[Country]> {
 guard error == nil else {
-return .error(error!.localizedDescription)
-}
-
+return .error(error!.localizedDescription) }
 guard let response = response as? HTTPURLResponse,
 200..<300 ~= response.statusCode,
 let data = data else {
-return .error("Server Error")
-}
-
+return .error("Server Error") }
 guard let json = try? JSONSerialization.jsonObject(with: data),
 let countries = parseCountries(json) else {
-return .error("Invalid data")
-}
-
-return .success(countries)
-}
-
+return .error("Invalid data") }
+return .success(countries) }
 func parseCountries(_ json: Any) -> [Country]? {
 guard let arrayOfJsonDicts = json as? [[String: Any]] else { return nil }
-return arrayOfJsonDicts.flatMap { Country(json: $0) }
-}
-}
-// CountriesViewController.swift
-import UIKit
-
+return arrayOfJsonDicts.flatMap { Country(json: $0) } } }
+import UIKit // CountriesViewController.swift
 class CountriesViewController: UITableViewController {
 var countries: [Country] = []
-
 override func viewDidLoad() {
 super.viewDidLoad()
-
 let client = APIClient()
-client.getCountries { result in
-switch result {
+client.getCountries { result in switch result {
 case .success(let countries):
 self.countries = countries
 self.tableView.reloadData()
 case .error(let message):
 let alertController = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
 alertController.addAction(UIAlertAction(title: "OK", style: .default))
-self.present(alertController, animated: true)
-}
-}
-}
-
+self.present(alertController, animated: true) } } }
 override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-return countries.count
-}
-
+return countries.count }
 override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 let cell = tableView.dequeueReusableCell(withIdentifier: "CountryCell", for: indexPath) as! CountryCell
 let country = countries[indexPath.row]
 cell.countryLabel.text = country.name
-
 let capital = country.capital.isEmpty ? "N/A" : country.capital
 cell.capitalLabel.text = "Capital: \(capital)"
-
 let formatter = NumberFormatter()
 formatter.groupingSeparator = "'"
 formatter.usesGroupingSeparator = true
 formatter.groupingSize = 3
 let population = country.population == 0 ? "N/A" : formatter.string(from: country.population as NSNumber)!
 cell.populationLabel.text = "Population: \(population)"
-
-return cell
-}
-}
-// Country.swift
-struct Country {
+return cell } }
+struct Country { // Country.swift
 let name: String
 let capital: String
 let population: Int
-
 init?(json: [String: Any]) {
 guard let name = json["name"] as? String,
 let capital = json["capital"] as? String,
 let population = json["population"] as? Int else {
-return nil
-}
-
+return nil }
 self.name = name
 self.capital = capital
-self.population = population
-}
-}
-// CountryCell.swift
-import UIKit
-
+self.population = population } }
+import UIKit // CountryCell.swift
 class CountryCell: UITableViewCell {
 @IBOutlet weak var countryLabel: UILabel!
 @IBOutlet weak var capitalLabel: UILabel!
-@IBOutlet weak var populationLabel: UILabel!
-}
+@IBOutlet weak var populationLabel: UILabel! }
 \end{lstlisting}
 
 \subsection{Auto Layout}
+Content Hugging Priority higher = which label will grow beyond size
+Content Compression Resistance Priority higher = will not be compressed like H... 
 \begin{lstlisting}
-import UIKit
+import UIKit // Constraint = linear equation.
 class ViewController : UIViewController {
  let container = UIView ()
- let label = UILabel ()
+ let label = UILabel () // intrinsic content size (content = default size)
  let textField = UITextField ()
- let button = UIButton ()
-
+ let button = UIButton () // intrinsic content size
  override func viewDidLoad () {
   super .viewDidLoad()
   view.addSubview(container)
@@ -1471,21 +1453,18 @@ class ViewController : UIViewController {
   textField.translatesAutoresizingMaskIntoConstraints = false
   textField.widthAnchor.constraint(equalTo: container.widthAnchor, multiplier: 0.5 ).isActive = true
   textField.centerXAnchor.constraint(equalTo: container.centerXAnchor).isActive = true
-  textField.topAnchor.constraint(equalTo: container.topAnchor, constant: 20 ).isActive = true
- }
-
+  textField.topAnchor.constraint(equalTo: container.topAnchor, constant: 20 ).isActive = true }
  container.addSubview(button)
  button.setTitle( "Login" , for : .normal)
  button.setTitleColor(.blue, for : .normal)
  button.translatesAutoresizingMaskIntoConstraints = false
  button.centerXAnchor.constraint(equalTo: container.centerXAnchor).isActive = true
- button.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 10).isActive = true
-}
+ button.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 10).isActive = true }
 \end{lstlisting}
 
-\subsection{Facts}
-Swift is \textbf{statically and strongly typed}. Compiler can often infer
-types. Uses \textbf{Goals}: Safety, Readability, Interoperability with Objective-C.
-\textbf{Swift Evolution} is a separate GitHub repository that tracks the
-ongoing evolution of the Swift.
+%\subsection{Facts}
+%Swift is \textbf{statically and strongly typed}. Compiler can often infer
+%types. Uses \textbf{Goals}: Safety, Readability, Interoperability with Objective-C.
+%\textbf{Swift Evolution} is a separate GitHub repository that tracks the
+%ongoing evolution of the Swift.
 

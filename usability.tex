@@ -36,7 +36,6 @@ top(surface) = concrete, bottom = abstract (strategy).
 UCD Techniques: \textbf{Interviews, contextual inquiry} (strategy, scope | analyse design). \textbf{Scenarios, storyboards} (scope, structure | (analyse) design). \textbf{Wireframes, prototypes \& testing} (structure, skeleton | (design) test).
 \\ Benutzerbefragung ist keine User Centered Design $\rightarrow$ People don't know what they want. You have to show it to them first. First rule of usability: Don't listen to users. Observe what they do not what they say. Customer $\rightarrow$ problem expert. Designer $\rightarrow$ solution expert.
 
-
 \subsection{Scenarios and Personas}
 story of the user solving a problem that arises out of logical needs of the situation.
 \textbf{Problem-Scenarios} show current (problematic) situations.
@@ -164,8 +163,11 @@ Put back button in app is bad (if necessary provide up button), same with exit b
 \textbf{Antipatterns:} Splash screen (better image placeholders), tutorial screen (better explain in time, context), Confirmation window (better provide undo), Menu button (outdated), Hiding status bar, sipe overlay quick actions, using non-android design. Don't mix actions and navigation in a single bar.
 
 \subsection{IOS Platform Guideline}
+\includegraphics[width=0.15\textwidth]{ioslife.png}
 The iOS HIG (Human Interface Guideline) is like material design but for ios (Overview, Interactions, Features, Visual Design, Graphics, UI Bars, UI Views, UI Controls, Extensions, Technologies, Resources, Related Guidelines). Consider putting a segmented control in a navigation bar at the top level of an app. Helps to flatten the information hierarchy, making it easier to find things. Be sure to choose accurate back button titles. The Floating Action Button is not that good, better right side of navigation bar or tool bar. iOS needs close buttons! iOS design: everything clickable no side menus, better no side menus in iOS. Google has side menu integrated (older than 40 not used to click on hamburger icon to get to menu). Tab-bar new at the bottom for both system.
 Modern take swift: Statically, strongly typed. Compiler can often infer types (type annotation can often be omitted). Compiles to native code. No main, semicolons required. print() is defined in the Standard library (implicitly imported). Only file which can contain top level code is main.swift (else top level declarations). Goal: safer, more flexible more fun more than Objective C (interoperability).Integer overflow traps. + Better chance to find overflow bugs. + Well defined behavior. - Requires run-time checks. Has types Int, Float, Double, String, Bool, Array<T> or [T], Set<T>, Dictionary<K,V> or [K:V]. All have value semantics. Some use coopy on write in order to be efficient. Are nominal types: can be extended (initializer (ctor) methods etc.) 
+\includegraphics[width=0.15\textwidth]{navigationbar.png}
+ViewControllers=each controls a view and its subviews. There are methods/hooks for when a view controllers view i sloaded, appears, disappears (ViewController Lifecycle). viewDidLoad() main and subviews are loaded from the interface builder, bus size and position may not be set yet. Good method to change background color, add additional subvies, change text labels etc.
 
 \subsection{Material Design}
 \textbf{Principles:} Material is the metaphor: Elevation of materials, what is above which element, how height. Bold, graphic, intentional: typography, grids, color, scale, space, create hierarchy, meaning, focus. Motion provides meaning: focus attention, giving feedback.
@@ -178,18 +180,6 @@ COMPILE DISTRIBUTION VERSION $\rightarrow$ TEST $\rightarrow$ RELEASE/PUBLISH \\
 
 \subsection{Costs}
 40k for a kart, 100k for a Skoda, 500k for a BMW, 1mio+ for a Rolls Royce. Switzerland iPhone Country (2/3 : 1/3) but worldwide android 80-90. \textbf{When go native:} If security is very important (SDKs NDK), Performance or resource optimization (battery, memory), Use newest technologies (APIs, wearables etc), When only one platform must be supported. Pixel perfect UIs. \textbf{When go cross:} Low budget, only basic requirements for UI, Web programming skills available but no native skills, prototyping or proof of concepts, Game engines, 3D visualization (unity). Mostly it's not as much faster to implement and not much less cost as expected. 60 per cent is not yet using swift.
-
-\subsection{MVC -  Model-View-Controller}
-Model = represents app's data, notifies the controller about changes in the data, takes care of things like persistence, model objects and networking. View(UIView) = represents the face of the app, notifies the controller about user-actions, reusable classes without domain-specific logic. Controller(UIKit-dependent) = mediates between model and view, implements domain-specific logic, updates model and view. Problems = Tight coupling between View and ViewController, Controller is hard to test because of UIKit dependency, MVC == Massive View Controller = Delegate / DataSource methods, Target-Action methods, ViewController Lifecycle methods, Layout code, Formatting of data (transforming data object into strings), providing default values for missing data (placeholder images)
-\includegraphics[width=0.15\textwidth]{mvc.png}
-
-\subsection{MVP - Model-View-Presenter}
-Model = represents app's data, notifies the controller about changes in the data, takes care of things like persistence, model objects and networking. View (UIView + UIViewController) = Represents the face of the app, Notifies the presenter about user-actions, \textbf{knows the presenter}. Presenter(UIKit-independent) = mediates between model and view, implements domain-specific logic, updates model and view, \textbf{Loosely coupled to View via protocol}.
-\includegraphics[width=0.15\textwidth]{mvp.png}
-
-\subsection{MVVM - Model-View-ViewModel}
-Modle = represents the app's data, notifies the controller about changes in the data, takes care of things like persistence, model objects and networking. View (UIView + UIViewController) = represents the face of the app, \textbf{notifies ViewModel about user-actions and observes properties of ViewModel, Knows the ViewModel}. ViewModel(UIKit-independent) = mediates between Model and View, Implements domain-specific logic, updates model and view (indirectly via bindings), \textbf{loosely coupled to view via bindings / Observer-pattern}.
-\includegraphics[width=0.15\textwidth]{mvvm.png}
 
 \subsection{Swift}
 Swift is statically typed (types known at compile time), strongly typed (there aren't a lot of implicit type coercions (pass int instead of double needs cast)), compiler can often infer types (type annotations can be omitted), uses automatic reference counting (ARC) for memory management. Compiles to native code (doesnt run in virtual machine), may rely on Objective-C runtime (not available on linux). No main() required. print() defined in standard library (implicitly imported). Only main.swift can contain top-level code (all others only top level declarations). Goals = safer, more flexible more fun than Objective C. Each significant change is described in a proposal (Markdown). idea mailing list - write proposal - request review - core team member who accept pull request becomes review manager - number assigned - anyone can review - core team decides if accepted rejected or deferred.
@@ -214,8 +204,133 @@ str.utf16.count = 9,
 str.uppercased(),
 str.lowercased()
 
+\subsection{Arrays}
+have to be same type, value semantics, empty array [], [Int] = Array<Int>\\
+let ints1 = [1, 2, 3, 4, 5] //Array<Int>
+, var ints2 = ints1 // mutable copy
+, ints2.append(6) // here copy
+, print(ints1)
+, let strs = Array(repeating: "Hi", count: 10)
+, for s in strs { ... }
+, for (i, s) in strs.enumerated() { ... }
+, ints2[0...<3] = [0, 0]
+, ints2[0...4] = []
+%\begin{lstlisting}
+%let ints1 = [1, 2, 3, 4, 5] //Array<Int>
+%var ints2 = ints1 // mutable copy
+%ints2.append(6) // here copy
+%print(ints1)
+%let strs = Array(repeating: "Hi", count: 10)
+%for s in strs { ... }
+%for (i, s) in strs.enumerated() { ... }
+%ints2[0...<3] = [0, 0]
+%ints2[0...4] = []
+%\end{lstlisting}
+
+\subsection{Sets}
+Elements needs to conform Hashable protocol. Value semantics.\\
+, var letters: Set<Character> = []
+, for c in "it is a test".characters {
+	letters.insert(c) }
+, if letters.contains(" ") { // compiler knows its char not str
+	print(letters.count) }
+%\begin{lstlisting}
+%var letters: Set<Character> = []
+%for c in "it is a test".characters {
+%   letters.insert(c) }
+%if letters.contains(" ") { // compiler knows its char not str
+%   print(letters.count) }
+%\end{lstlisting}
+
+\subsection{Dictionaries}
+keys need to conform to Hashable protocol. value semantics, empty dictionary [:]
+[TypeK:TypeV] = Dictionary<TypeK, TypeV> \\
+, let population = ["Switzerland" : 8\_000\_000,
+, "Germany" : 80\_000\_000]
+, for (country, count) in population {
+	print("\\(country): \\(count) people") }
+, print(population["Germany"])
+, print(population["Italy"]) // nil
+, population["France"] = 66\_000\_000 //new
+, for k in population.keys { }
+, for v in population.values { }
+%\begin{lstlisting}
+%let population = ["Switzerland" : 8_000_000,
+%                       "Germany" : 80_000_000]
+%for (country, count) in population {
+%   print("\(country): \(count) people") }
+%print(population["Germany"])
+%print(population["Italy"]) // nil
+%population["France"] = 66_000_000 //new
+%for k in population.keys { }
+%for v in population.values { }
+%\end{lstlisting}
+
+\subsection{Tuples}
+Tuples, function types, any, anyobjects cant be extended !
+multiple values into single compound value, can have different types, no single-element tuples Type(Int) = type int. Expression ("hello") = type String not (String). Empty tuple () is a valid type. Has a single value, same as Void \\
+let john = (33, "John") // (Int, String)
+, print("\\(john,1) is \\(john.0).")
+, let dora1 = (age: 26, name: "Dora1")
+, var dora2 = dora1
+, dora2.name = "Dora2"
+, dora2.age += 1
+, print(\\(dora2.name) is \\(dora2.age))
+%\begin{lstlisting}
+%let john = (33, "John") // (Int, String)
+%print("\(john,1) is \(john.0).")
+%let dora1 = (age: 26, name: "Dora1")
+%var dora2 = dora1
+%dora2.name = "Dora2"
+%dora2.age += 1
+%print(\(dora2.name) is \(dora2.age))
+%\end{lstlisting}
+
+\subsection{Function Types ** buggy}
+func f1() {}  // (()) -> () **
+, func f2(\_x: Int) -> Int { return x } // (Int) -> Int
+, func f3(\_x: Int, \_y: Int) {} // ((Int, Int)) -> () **
+, func f4(\_x: (Int, Int)) {} // ((Int, Int)) -> Int
+%\begin{lstlisting}
+%func f1() {}  // (()) -> () **
+%func f2(_x: Int) -> Int { return x } // (Int) -> Int
+%func f3(_x: Int, _y: Int) {} // ((Int, Int)) -> () **
+%func f4(_x: (Int, Int)) {} // ((Int, Int)) -> Int
+%\end{lstlisting}
+
+
+\subsection{Any vs AnyObject}
+any: existential type without requirements, build into compiler, all types are implicit subtypes of it \\
+func f(\_x: Any) {}
+, class C {}
+, let c = C()
+, f(c)
+, f(2)
+, f((0.5, "test"))
+, f([true, false, true])
+, f(f)
+%\begin{lstlisting}
+%func f(_x: Any) {}
+%class C {}
+%let c = C()
+%f(c)
+%f(2)
+%f((0.5, "test"))
+%f([true, false, true])
+%f(f)
+%\end{lstlisting}
+They all work. If AnyObject instead of Any it has to be a class. Only f(c) works. (class requirement)
+Never: uninhabited type in stl (doesnt have any value) public enum Never{}, means that function can not return, examples fatalError() exit(), they can be used in else-clause of guard statement.
+
 \subsection{Frameworks}
+Cocoa Touch = \textbf{UIKit}, Push Notification, MapKit, MessagUI, AddressBook UI, EventKit UI, GameKit
+Media Layer = Core Animation, Core Image, Core Graphics , OpenAL, OpenGL.., Core Text, Core Audio, Image /O
+Core Services = Core Data, \textbf{Foundation}, Core Foundation, SQLite, Address Book, XML Support, Store Kit, Core Location, System Configuration, Core Media, CFNetwork.
+Core OS = System(Kernel, UNIX Interfaces), Security
 
 \subsection{Structure of an App}
+\includegraphics[width=0.15\textwidth]{appstructure.png}
 
-\subsection{TODO SOME QUESTIONS FROM UINT1 UINT2 WHICH ARE COVERED IN THIS CLASS}
+\subsection{Networking with URLSession}
+URLSession + related classed provide a complete networking API. Part of the Foundation framework. Also available on linux.
+URLSessionConfiguration $\leftarrow$ URLSession $\rightarrow$ (creates) URLSessionTask $\leftarrow$ URLSessionDataTask or URLSessionDownloadTask or URLSessionUploadTask. URLSessionTask = A task represents a specific download / upload. Tasks are created using URLSession's factory methods. All tasks start in a suspended state. Call resume() to start the task. Completion handler is executed on background thread.
