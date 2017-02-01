@@ -241,10 +241,6 @@ p2 = p1
 \end{lstlisting}
 
 \subsection{Initializers}
-init() { self.name = "<unknown>" }
-init?(name: String) { // failable initializer
-	guard !name.isEmpty else { return nil }
-	self.name = name; }
 \begin{lstlisting}
 init() { self.name = "<unknown>" }
 init?(name: String) { // failable initializer
@@ -625,7 +621,7 @@ cell.accessoryType = .disclosureIndicator
 return cell }
 override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 tableView.deselectRow(at: indexPath, animated: true)
-print("selected"\(months[indexPath.row])")} } 
+print("selected"\(months[indexPath.row])")} }
 // example 2 with sections class not written again
 let seasons = [Season(name: "Spring", months: ["Mar","Apr","May"]),...]
 override func numberOfSections(in tableView: UITableView) -> Int { return seasons.count}
@@ -1425,7 +1421,7 @@ class CountryCell: UITableViewCell {
 
 \subsection{Auto Layout}
 Content Hugging Priority higher = which label will grow beyond size
-Content Compression Resistance Priority higher = will not be compressed like H... 
+Content Compression Resistance Priority higher = will not be compressed like H...
 \begin{lstlisting}
 import UIKit // Constraint = linear equation.
 class ViewController : UIViewController {
